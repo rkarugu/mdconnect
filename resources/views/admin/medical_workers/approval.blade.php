@@ -7,11 +7,11 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Medical Workers Approval</h1>
         <div class="flex space-x-3">
-            <a href="{{ route('admin.medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <a href="{{ route('medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to All Workers
             </a>
-            <a href="{{ route('admin.medical_workers.verification') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+            <a href="{{ route('medical_workers.verification') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                 <i class="fas fa-check-circle mr-2"></i>
                 Go to Verification
             </a>
@@ -45,8 +45,8 @@
                 @forelse($workers as $worker)
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $worker->user->name }}</div>
-                            <div class="text-sm text-gray-500">{{ $worker->user->email }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $worker->name }}</div>
+                            <div class="text-sm text-gray-500">{{ $worker->email }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $worker->specialty->name }}</div>
@@ -63,17 +63,17 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.medical_workers.show', $worker) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <a href="{{ route('medical_workers.show', $worker) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-eye"></i> View Details
                             </a>
-                            <form action="{{ route('admin.medical_workers.approve', $worker) }}" method="POST" class="inline-block">
+                            <form action="{{ route('medical_workers.approve', $worker) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="text-green-600 hover:text-green-900 mr-3">
                                     <i class="fas fa-thumbs-up"></i> Approve
                                 </button>
                             </form>
-                            <form action="{{ route('admin.medical_workers.reject', $worker) }}" method="POST" class="inline-block">
+                            <form action="{{ route('medical_workers.reject', $worker) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to reject this application?')">

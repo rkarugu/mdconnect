@@ -23,7 +23,7 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ route('admin.users.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all users</a>
+                    <a href="{{ route('users.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all users</a>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ route('admin.medical_workers.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all medical workers</a>
+                    <a href="{{ route('medical_workers.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all medical workers</a>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ route('admin.medical_specialties.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all specialties</a>
+                    <a href="{{ route('medical_specialties.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all specialties</a>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ route('admin.medical_facilities.verification') }}" class="font-medium text-blue-600 hover:text-blue-500">Review facility documents</a>
+                    <a href="{{ route('medical_facilities.verification') }}" class="font-medium text-blue-600 hover:text-blue-500">Review facility documents</a>
                 </div>
             </div>
         </div>
@@ -132,8 +132,8 @@
                 <li class="px-6 py-4">
                     <div class="flex items-center">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $worker->user->name }}</p>
-                            <p class="text-sm text-gray-500">{{ $worker->specialty->name }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $worker->name ?? ($worker->user->name ?? 'Medical Worker') }}</p>
+                            <p class="text-sm text-gray-500">{{ $worker->specialty->name ?? 'No specialty data' }}</p>
                         </div>
                         <div class="ml-4 flex-shrink-0">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -152,7 +152,7 @@
         <div class="bg-white shadow rounded-lg">
             <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-medium leading-6 text-gray-900">Facilities Needing Verification</h3>
-                <a href="{{ route('admin.medical_facilities.verification') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                <a href="{{ route('medical_facilities.verification') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     View all
                 </a>
             </div>
@@ -173,7 +173,7 @@
                                 <div class="w-16 bg-gray-200 rounded-full h-1.5">
                                     <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $totalDocs > 0 ? ($verifiedDocs / $totalDocs) * 100 : 0 }}%"></div>
                                 </div>
-                                <a href="{{ route('admin.medical_facilities.documents', $facility) }}" 
+                                <a href="{{ route('medical_facilities.documents', $facility) }}" 
                                    class="text-blue-600 hover:text-blue-900 text-xs">
                                     <i class="fas fa-file-alt"></i> {{ $verifiedDocs }}/{{ $totalDocs }}
                                 </a>

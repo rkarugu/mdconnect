@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MedicalWorker;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -73,6 +74,8 @@ class MedicalWorkerAuthController extends Controller
      */
     public function login(Request $request)
     {
+        Log::debug('MEDICAL_WORKER_LOGIN_ATTEMPT', ['request_data' => $request->all()]);
+        Log::debug('Validator created');
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
@@ -87,15 +90,18 @@ class MedicalWorkerAuthController extends Controller
         }
 
         // Check if medical worker exists
+        Log::debug('Attempting to find medical worker by email: ' . $request->email);
         $medicalWorker = MedicalWorker::where('email', $request->email)->first();
 
         if (!$medicalWorker || !Hash::check($request->password, $medicalWorker->password)) {
+            Log::warning('MEDICAL_WORKER_LOGIN_FAILED', ['email' => $request->email, 'reason' => 'Invalid credentials']);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
         // Check if the medical worker is approved
+        Log::debug('Checking approval status for worker: ' . $medicalWorker->id);
         if ($medicalWorker->status !== 'approved') {
             return response()->json([
                 'success' => false,
@@ -104,20 +110,29 @@ class MedicalWorkerAuthController extends Controller
         }
 
         // Delete previous tokens
+        Log::debug('Deleting old tokens for worker: ' . $medicalWorker->id);
         $medicalWorker->tokens()->delete();
 
         // Create new token
+        Log::debug('Creating new token for worker: ' . $medicalWorker->id);
         $token = $medicalWorker->createToken('auth_token')->plainTextToken;
+
+        Log::debug('Token created. Checking if password change is required for worker: ' . $medicalWorker->id);
+        Log::debug('Medical worker profile picture path: ' . $medicalWorker->profile_picture, ['profile_picture' => $medicalWorker->profile_picture]);
+        $passwordChangeRequired = $medicalWorker->password_change_required ?? false;
+        $message = $passwordChangeRequired
+            ? 'Please change your password'
+            : 'Medical worker logged in successfully';
 
         return response()->json([
             'success' => true,
-            'message' => 'Medical worker logged in successfully',
+            'message' => $message,
             'data' => [
                 'medical_worker' => $medicalWorker,
                 'token' => $token,
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
             ]
-        ]);
+        ])->setStatusCode(200);
     }
 
     /**

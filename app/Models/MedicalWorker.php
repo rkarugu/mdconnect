@@ -40,6 +40,7 @@ class MedicalWorker extends Authenticatable
         'approved_at' => 'datetime',
         'last_status_change' => 'datetime',
         'email_verified_at' => 'datetime',
+        'password_change_required' => 'boolean',
     ];
 
     protected $dates = [
@@ -53,9 +54,25 @@ class MedicalWorker extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
         'remember_token',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['password_change_required'];
+
+    /**
+     * Get the password_change_required attribute.
+     *
+     * @return bool
+     */
+    public function getPasswordChangeRequiredAttribute(): bool
+    {
+        return (bool) ($this->attributes['password_change_required'] ?? false);
+    }
 
     /**
      * Get the user associated with this medical worker.

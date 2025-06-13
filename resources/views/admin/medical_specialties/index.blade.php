@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Medical Specialties</h1>
-        <a href="{{ route('admin.medical_specialties.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <a href="{{ route('medical_specialties.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
             <i class="fas fa-plus mr-2"></i>
             Create Specialty
         </a>
@@ -38,7 +38,7 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                             @if(($specialty->medical_workers_count ?? 0) === 0)
-                                <form action="{{ route('admin.medical_specialties.destroy', $specialty) }}" method="POST" class="inline-block">
+                                <form action="{{ route('medical_specialties.destroy', $specialty) }}" method="POST" class="inline-block">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this specialty?')">
@@ -108,7 +108,7 @@
 
     function showCreateModal() {
         modalTitle.textContent = 'Add Medical Specialty';
-        form.action = '{{ route('admin.medical_specialties.store') }}';
+        form.action = '{{ route('medical_specialties.store') }}';
         form.method = 'POST';
         nameInput.value = '';
         descriptionInput.value = '';

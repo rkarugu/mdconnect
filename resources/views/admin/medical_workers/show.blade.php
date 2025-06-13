@@ -5,11 +5,11 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Medical Worker Details</h1>
         <div class="flex space-x-3">
-            <a href="{{ route('admin.medical_workers.edit', $medical_worker) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <a href="{{ route('medical_workers.edit', $medical_worker) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 <i class="fas fa-edit mr-2"></i>
                 Edit
             </a>
-            <a href="{{ route('admin.medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            <a href="{{ route('medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to List
             </a>
@@ -20,19 +20,19 @@
         <div class="px-4 py-5 sm:px-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    @if($medical_worker->user->profile_picture)
-                        <img src="{{ asset('storage/' . $medical_worker->user->profile_picture) }}" 
-                             alt="{{ $medical_worker->user->name }}" 
+                    @if($medical_worker->profile_picture)
+                        <img src="{{ asset('storage/' . $medical_worker->profile_picture) }}" 
+                             alt="{{ $medical_worker->name ?? 'Medical Worker' }}" 
                              class="h-16 w-16 rounded-full object-cover"
-                             onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
+                             onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}'">
                     @else
                         <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
                             <i class="fas fa-user text-gray-400 text-2xl"></i>
                         </div>
                     @endif
                     <div class="ml-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $medical_worker->user->name }}</h3>
-                        <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ $medical_worker->specialty->name }}</p>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $medical_worker->name ?? 'No name available' }}</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ $medical_worker->specialty->name ?? 'No specialty information' }}</p>
                     </div>
                 </div>
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
@@ -48,11 +48,11 @@
                 <!-- Personal Information -->
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">Email</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $medical_worker->user->email }}</dd>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $medical_worker->email ?? 'No email available' }}</dd>
                 </div>
                 <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">Phone</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $medical_worker->user->phone }}</dd>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $medical_worker->phone ?? 'No phone available' }}</dd>
                 </div>
 
                 <!-- Professional Information -->
@@ -81,7 +81,18 @@
                 <div class="bg-white px-4 py-5 sm:px-6">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-lg font-medium text-gray-900">Documents</h4>
-                        <span class="text-sm text-gray-500">{{ $medical_worker->documents->count() }} document(s)</span>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-500">{{ $medical_worker->documents->count() }} document(s)</span>
+                            @if($medical_worker->status === 'pending' && $medical_worker->documents->count() > 0)
+                            <form action="{{ route('medical_workers.verify', $medical_worker) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                    <i class="fas fa-check-double mr-1"></i> Verify All & Approve Worker
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @forelse($medical_worker->documents as $document)
@@ -99,7 +110,7 @@
                                 </span>
                             </div>
                             <div class="flex-shrink-0 space-y-2">
-                                <a href="{{ route('admin.medical_workers.preview_document', [$medical_worker, $document]) }}" 
+                                <a href="{{ route('medical_workers.preview_document', [$medical_worker, $document]) }}" 
                                    class="text-blue-600 hover:text-blue-900 block"
                                    target="_blank">
                                     <i class="fas fa-eye"></i>
@@ -110,7 +121,7 @@
                                     <i class="fas fa-download"></i>
                                 </a>
                                 @if($document->status === 'pending')
-                                <form action="{{ route('admin.medical_workers.verify_document', [$medical_worker, $document]) }}" method="POST" class="inline">
+                                <form action="{{ route('medical_workers.verify_document', [$medical_worker, $document]) }}" method="POST" class="inline">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="status" value="approved">
@@ -118,7 +129,7 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
-                                <form action="{{ route('admin.medical_workers.verify_document', [$medical_worker, $document]) }}" method="POST" class="inline">
+                                <form action="{{ route('medical_workers.verify_document', [$medical_worker, $document]) }}" method="POST" class="inline">
                                     @csrf
                                     @method('PUT')
                                     <input type="hidden" name="status" value="rejected">
@@ -155,7 +166,7 @@
             <div class="mt-2 max-w-xl text-sm text-gray-500">
                 <p>Change the status of this medical worker. This will affect their ability to use the platform.</p>
             </div>
-            <form action="{{ route('admin.medical_workers.update_status', $medical_worker) }}" method="POST" class="mt-5">
+            <form action="{{ route('medical_workers.update_status', $medical_worker) }}" method="POST" class="mt-5">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -130,7 +130,7 @@ class MedicalFacilityController extends Controller
             DB::commit();
             
             return redirect()
-                ->route('admin.medical_facilities.show', $facility)
+                ->route('medical_facilities.show', $facility)
                 ->with('success', 'Medical facility created successfully.');
                 
         } catch (\Exception $e) {
@@ -199,7 +199,7 @@ class MedicalFacilityController extends Controller
             $medical_facility->updateStatus($request->status, $request->status_reason);
 
             return redirect()
-                ->route('admin.medical_facilities.show', $medical_facility)
+                ->route('medical_facilities.show', $medical_facility)
                 ->with('success', 'Medical facility status updated successfully.');
         } catch (\Exception $e) {
             return back()
@@ -307,7 +307,7 @@ class MedicalFacilityController extends Controller
             $status = $request->status === 'approved' ? 'approved' : 'rejected';
             
             return redirect()
-                ->route('admin.medical_facilities.documents', $medical_facility)
+                ->route('medical_facilities.documents', $medical_facility)
                 ->with('success', "{$count} documents have been {$status} successfully.");
         } catch (\Exception $e) {
             return back()
@@ -356,7 +356,7 @@ class MedicalFacilityController extends Controller
 
             $medical_facility->updateStatus('verified');
             return redirect()
-                ->route('admin.medical_facilities.verification')
+                ->route('medical_facilities.verification')
                 ->with('success', 'Medical facility verified successfully. Ready for final approval.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error verifying medical facility: ' . $e->getMessage());
@@ -375,7 +375,7 @@ class MedicalFacilityController extends Controller
 
             $medical_facility->updateStatus('approved');
             return redirect()
-                ->route('admin.medical_facilities.approval')
+                ->route('medical_facilities.approval')
                 ->with('success', 'Medical facility approved successfully.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error approving medical facility: ' . $e->getMessage());
@@ -394,7 +394,7 @@ class MedicalFacilityController extends Controller
         try {
             $medical_facility->updateStatus('rejected', $request->status_reason);
             return redirect()
-                ->route('admin.medical_facilities.approval')
+                ->route('medical_facilities.approval')
                 ->with('success', 'Medical facility rejected successfully.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error rejecting medical facility: ' . $e->getMessage());
@@ -415,7 +415,7 @@ class MedicalFacilityController extends Controller
             $medical_facility->delete(); // This will soft delete the facility
             $medical_facility->user->delete(); // This will delete the associated user
 
-            return redirect()->route('admin.medical_facilities.index')
+            return redirect()->route('medical_facilities.index')
                 ->with('success', 'Medical facility deleted successfully.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error deleting medical facility: ' . $e->getMessage());
@@ -479,7 +479,7 @@ class MedicalFacilityController extends Controller
             DB::commit();
             
             return redirect()
-                ->route('admin.medical_facilities.documents.upload', $medical_facility)
+                ->route('medical_facilities.documents.upload', $medical_facility)
                 ->with('success', 'Document uploaded successfully.');
                 
         } catch (\Exception $e) {

@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Edit Medical Worker</h1>
-        <a href="{{ route('admin.medical_workers.show', $medical_worker) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <a href="{{ route('medical_workers.show', $medical_worker) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             <i class="fas fa-arrow-left mr-2"></i>
             Back to Details
         </a>
@@ -13,9 +13,9 @@
     <div class="bg-white shadow overflow-hidden sm:rounded-lg">
         <div class="px-4 py-5 sm:px-6">
             <div class="flex items-center">
-                @if($medical_worker->user->profile_picture)
+                @if($medical_worker->user && $medical_worker->user->profile_picture)
                     <img src="{{ asset('storage/' . $medical_worker->user->profile_picture) }}" 
-                         alt="{{ $medical_worker->user->name }}" 
+                         alt="{{ $medical_worker->user->name ?? 'Medical Worker' }}" 
                          class="h-16 w-16 rounded-full object-cover"
                          onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
                 @else
@@ -24,13 +24,13 @@
                     </div>
                 @endif
                 <div class="ml-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $medical_worker->user->name }}</h3>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ $medical_worker->specialty->name }}</p>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $medical_worker->user->name ?? 'No name available' }}</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ $medical_worker->specialty->name ?? 'No specialty information' }}</p>
                 </div>
             </div>
         </div>
 
-        <form action="{{ route('admin.medical_workers.update', $medical_worker) }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
+        <form action="{{ route('medical_workers.update', $medical_worker) }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
             @csrf
             @method('PUT')
             
@@ -40,9 +40,9 @@
                     <div class="col-span-2">
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
-                                @if($medical_worker->user->profile_picture)
+                                @if($medical_worker->user && $medical_worker->user->profile_picture)
                                     <img src="{{ Storage::url($medical_worker->user->profile_picture) }}" 
-                                         alt="{{ $medical_worker->user->name }}" 
+                                         alt="{{ $medical_worker->user->name ?? 'Medical Worker' }}" 
                                          class="h-24 w-24 rounded-full object-cover">
                                 @else
                                     <div class="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -58,7 +58,7 @@
                                         <i class="fas fa-upload mr-2"></i>
                                         Upload New Photo
                                     </label>
-                                    @if($medical_worker->user->profile_picture)
+                                    @if($medical_worker->user && $medical_worker->user->profile_picture)
                                         <button type="button" onclick="document.getElementById('profile_picture').value = ''" class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                             <i class="fas fa-trash mr-2"></i>
                                             Remove
@@ -80,7 +80,7 @@
 
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $medical_worker->user->name) }}" required
+                        <input type="text" name="name" id="name" value="{{ old('name', $medical_worker->name) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -89,7 +89,7 @@
 
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $medical_worker->user->email) }}" required
+                        <input type="email" name="email" id="email" value="{{ old('email', $medical_worker->email) }}" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         @error('email')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -98,7 +98,7 @@
 
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone', $medical_worker->user->phone) }}" required
+                        <input type="tel" name="phone" id="phone" value="{{ old('phone', $medical_worker->phone) }}"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         @error('phone')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

@@ -13,11 +13,13 @@ class RoleMiddleware
         $user = auth()->user();
 
         if (! $user) {
+            \Log::info('RoleMiddleware: User not authenticated, redirecting to login.');
             return redirect()->route('login');
         }
 
         foreach ($roles as $role) {
             if ($user->hasRole($role)) {
+                \Log::info('RoleMiddleware: User has role: ' . $role);
                 return $next($request);
             }
         }

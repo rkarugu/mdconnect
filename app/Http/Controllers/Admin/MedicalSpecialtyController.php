@@ -40,7 +40,7 @@ class MedicalSpecialtyController extends Controller
         MedicalSpecialty::create($validatedData);
 
         return redirect()
-            ->route('admin.medical_specialties.index')
+            ->route('medical_specialties.index')
             ->with('success', 'Medical specialty created successfully.');
     }
 
@@ -73,7 +73,7 @@ class MedicalSpecialtyController extends Controller
         $medicalSpecialty->update($validatedData);
 
         return redirect()
-            ->route('admin.medical_specialties.index')
+            ->route('medical_specialties.index')
             ->with('success', 'Medical specialty updated successfully.');
     }
 
@@ -86,7 +86,7 @@ class MedicalSpecialtyController extends Controller
         $medicalSpecialty->delete();
 
         return redirect()
-            ->route('admin.medical_specialties.index')
+            ->route('medical_specialties.index')
             ->with('success', 'Medical specialty deleted successfully.');
     }
 }

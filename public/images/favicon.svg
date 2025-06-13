@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Red circle for the "o" -->
+  <circle cx="16" cy="16" r="14" fill="#E74C3C" />
+  
+  <!-- Blue medical cross symbol -->
+  <circle cx="24" cy="22" r="7" fill="#3498DB" />
+</svg>

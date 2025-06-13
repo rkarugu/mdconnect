@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Register Medical Facility</h1>
-        <a href="{{ route('admin.medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <a href="{{ route('medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
             <i class="fas fa-arrow-left mr-2"></i> Back to Facilities
         </a>
     </div>
@@ -24,7 +24,7 @@
     @endif
 
     <div class="bg-white rounded-lg shadow overflow-hidden">
-        <form action="{{ route('admin.medical_facilities.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
+        <form action="{{ route('medical_facilities.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
             @csrf
 
             <!-- Facility Information -->

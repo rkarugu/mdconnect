@@ -48,10 +48,16 @@ class User extends Authenticatable
      */
     public function hasRole(string $roleName): bool
     {
-        if ($roleName === 'Admin' && optional($this->role)->name === 'Super Admin') {
+        // Normalize both the expected role name and the user's role name to lowercase for comparison
+        $userRoleName = strtolower(optional($this->role)->name);
+        $expectedRoleName = str_replace('-', ' ', strtolower($roleName));
+
+        // Special handling for 'Admin' if 'Super Admin' is present
+        if ($expectedRoleName === 'admin' && $userRoleName === 'super admin') {
             return true;
         }
-        return optional($this->role)->name === $roleName;
+
+        return $userRoleName === $expectedRoleName;
     }
     
     /**

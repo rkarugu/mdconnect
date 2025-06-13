@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Medical Facilities Verification</h1>
-        <a href="{{ route('admin.medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <a href="{{ route('medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
             <i class="fas fa-arrow-left mr-2"></i> Back to All Facilities
         </a>
     </div>
@@ -25,7 +25,7 @@
 
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
         <div class="p-4 border-b">
-            <form method="GET" action="{{ route('admin.medical_facilities.verification') }}" class="flex flex-wrap gap-4 items-end">
+            <form method="GET" action="{{ route('medical_facilities.verification') }}" class="flex flex-wrap gap-4 items-end">
                 <div class="flex-1 min-w-[250px]">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -36,7 +36,7 @@
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         <i class="fas fa-search mr-2"></i> Search
                     </button>
-                    <a href="{{ route('admin.medical_facilities.verification') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2">
+                    <a href="{{ route('medical_facilities.verification') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2">
                         <i class="fas fa-times mr-2"></i> Clear
                     </a>
                 </div>
@@ -122,12 +122,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <div class="flex flex-col space-y-2">
                                         <div class="flex space-x-3">
-                                            <a href="{{ route('admin.medical_facilities.show', $facility) }}" 
+                                            <a href="{{ route('medical_facilities.show', $facility) }}" 
                                                class="text-indigo-600 hover:text-indigo-900">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
                                             
-                                            <a href="{{ route('admin.medical_facilities.documents', $facility) }}" 
+                                            <a href="{{ route('medical_facilities.documents', $facility) }}" 
                                                class="text-blue-600 hover:text-blue-900">
                                                 <i class="fas fa-file-alt"></i> Documents
                                             </a>
@@ -137,7 +137,7 @@
                                             @if($facility->documents->count() > 0)
                                                 @if($facility->documents->where('status', 'pending')->count() > 0)
                                                     <!-- Some documents still need verification -->
-                                                    <form action="{{ route('admin.medical_facilities.documents.verify_all', $facility) }}" method="POST" class="inline">
+                                                    <form action="{{ route('medical_facilities.documents.verify_all', $facility) }}" method="POST" class="inline">
                                                         @csrf
                                                         <input type="hidden" name="status" value="approved">
                                                         <button type="submit" class="text-green-600 hover:text-green-900 cursor-pointer bg-transparent border-0 p-0">
@@ -146,7 +146,7 @@
                                                     </form>
                                                 @else
                                                     <!-- All documents verified, can verify facility -->
-                                                    <form action="{{ route('admin.medical_facilities.verify', $facility) }}" method="POST" class="inline">
+                                                    <form action="{{ route('medical_facilities.verify', $facility) }}" method="POST" class="inline">
                                                         @csrf
                                                         <button type="submit" class="text-green-600 hover:text-green-900 cursor-pointer bg-transparent border-0 p-0">
                                                             <i class="fas fa-check-circle"></i> Verify Facility

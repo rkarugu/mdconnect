@@ -7,7 +7,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Verify Medical Facility</h1>
         <div class="flex space-x-2">
-            <a href="{{ route('admin.medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+            <a href="{{ route('medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Facilities
             </a>
         </div>
@@ -40,13 +40,13 @@
             
             <div class="flex space-x-2">
                 @if($medical_facility->status == 'pending')
-                    <form action="{{ route('admin.medical_facilities.verify', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.verify', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                             <i class="fas fa-check-circle mr-2"></i> Verify Facility
                         </button>
                     </form>
-                    <form action="{{ route('admin.medical_facilities.verify_status', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.verify_status', $medical_facility) }}" method="POST">
                         @csrf
                         <input type="hidden" name="status" value="rejected">
                         <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
@@ -54,27 +54,27 @@
                         </button>
                     </form>
                 @elseif($medical_facility->status == 'verified')
-                    <form action="{{ route('admin.medical_facilities.approve', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.approve', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                             <i class="fas fa-thumbs-up mr-2"></i> Approve
                         </button>
                     </form>
-                    <form action="{{ route('admin.medical_facilities.reject', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.reject', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                             <i class="fas fa-thumbs-down mr-2"></i> Reject
                         </button>
                     </form>
                 @elseif($medical_facility->status == 'approved')
-                    <form action="{{ route('admin.medical_facilities.suspend', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.suspend', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
                             <i class="fas fa-ban mr-2"></i> Suspend
                         </button>
                     </form>
                 @elseif($medical_facility->status == 'rejected' || $medical_facility->status == 'suspended')
-                    <form action="{{ route('admin.medical_facilities.reinstate', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.reinstate', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                             <i class="fas fa-redo mr-2"></i> Reinstate
@@ -88,7 +88,7 @@
     <!-- Status Update Form -->
     <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
         <h2 class="text-lg font-medium mb-4">Update Status with Comment</h2>
-        <form action="{{ route('admin.medical_facilities.verify_status', $medical_facility) }}" method="POST">
+        <form action="{{ route('medical_facilities.verify_status', $medical_facility) }}" method="POST">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -252,10 +252,10 @@
                 <div class="border-b border-gray-200 bg-gray-50 px-4 py-3 flex justify-between items-center">
                     <h2 class="text-lg font-medium text-gray-800">Uploaded Documents</h2>
                     <div class="flex items-center space-x-2">
-                        <a href="{{ route('admin.medical_facilities.documents', $medical_facility) }}" class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                        <a href="{{ route('medical_facilities.documents', $medical_facility) }}" class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
                             <i class="fas fa-clipboard-check mr-1"></i> Verify Documents
                         </a>
-                        <a href="{{ route('admin.medical_facilities.documents.upload', $medical_facility) }}" class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
+                        <a href="{{ route('medical_facilities.documents.upload', $medical_facility) }}" class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
                             <i class="fas fa-upload mr-1"></i> Upload Documents
                         </a>
                         <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
@@ -317,7 +317,7 @@
                                     
                                     <!-- Document Actions -->
                                     <div class="border-t px-4 py-3 bg-gray-50 flex justify-between">
-                                        <a href="{{ route('admin.medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
+                                        <a href="{{ route('medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
                                            target="_blank" 
                                            class="text-blue-600 hover:text-blue-800 text-xs font-medium">
                                             <i class="fas fa-eye mr-1"></i> View Document
@@ -325,7 +325,7 @@
                                         
                                         @if($document->status == 'pending')
                                             <div class="flex space-x-2">
-                                                <form action="{{ route('admin.medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST" class="inline">
+                                                <form action="{{ route('medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST" class="inline">
                                                     @csrf
                                                     <input type="hidden" name="status" value="approved">
                                                     <button type="submit" class="text-green-600 hover:text-green-800 text-xs font-medium">
@@ -344,7 +344,7 @@
                                     
                                     <!-- Rejection Form (Hidden by default) -->
                                     <div id="reject-document-{{ $document->id }}" class="hidden border-t p-4 bg-gray-50">
-                                        <form action="{{ route('admin.medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST">
+                                        <form action="{{ route('medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="status" value="rejected">
                                             <div class="mb-2">

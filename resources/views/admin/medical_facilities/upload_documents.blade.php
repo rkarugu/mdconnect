@@ -7,10 +7,10 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Upload Facility Documents</h1>
         <div class="flex space-x-2">
-            <a href="{{ route('admin.medical_facilities.show', $medical_facility) }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+            <a href="{{ route('medical_facilities.show', $medical_facility) }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Facility
             </a>
-            <a href="{{ route('admin.medical_facilities.documents', $medical_facility) }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            <a href="{{ route('medical_facilities.documents', $medical_facility) }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 <i class="fas fa-file-alt mr-2"></i> View All Documents
             </a>
         </div>
@@ -55,7 +55,7 @@
             <h3 class="text-lg font-medium text-gray-800">Upload New Document</h3>
         </div>
         <div class="p-6">
-            <form action="{{ route('admin.medical_facilities.documents.upload.store', $medical_facility) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form action="{{ route('medical_facilities.documents.upload.store', $medical_facility) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -162,14 +162,14 @@
                                                     </span>
                                                 </div>
                                                 <div class="flex space-x-2">
-                                                    <a href="{{ route('admin.medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
+                                                    <a href="{{ route('medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
                                                        target="_blank" 
                                                        class="text-blue-600 hover:text-blue-800 text-sm">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
                                                     @if($document->status == 'pending')
-                                                        <form action="{{ route('admin.medical_facilities.documents.delete', [$medical_facility, $document]) }}" 
+                                                        <form action="{{ route('medical_facilities.documents.delete', [$medical_facility, $document]) }}" 
                                                               method="POST" 
                                                               onsubmit="return confirm('Are you sure you want to delete this document?');">
                                                             @csrf

@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-gray-500">Update user information.</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+            <a href="{{ route('users.index') }}" class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
                 <i class="fas fa-arrow-left -ml-0.5 mr-1.5"></i>
                 Back to Users
             </a>
@@ -38,7 +38,7 @@
     @endif
 
     <div class="bg-white shadow sm:rounded-lg">
-        <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="space-y-6 p-6">
+        <form action="{{ route('users.update', $user->id) }}" method="POST" class="space-y-6 p-6">
             @csrf
             @method('PUT')
 
@@ -93,7 +93,7 @@
             </div>
 
             <div class="flex items-center justify-end gap-x-4">
-                <button type="button" onclick="window.location='{{ route('admin.users.index') }}'"
+                <button type="button" onclick="window.location='{{ route('users.index') }}'"
                         class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                     Cancel
                 </button>

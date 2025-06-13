@@ -14,7 +14,7 @@ class RoleController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('role:super-admin'); // Only super-admins can manage roles
+        // Middleware applied at the route level in web.php
     }
 
     /**
@@ -24,9 +24,6 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-    return view('admin.roles.index', compact('roles'));
-    
         $roles = Role::with('permissions')->get(); // Fetch roles with permissions
         $permissions = Permission::all(); // Fetch all permissions
 
@@ -52,7 +49,7 @@ class RoleController extends Controller
             $role->permissions()->sync($request->permissions);
         }
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
     }
 
     /**
@@ -83,7 +80,7 @@ class RoleController extends Controller
             $role->permissions()->sync($request->permissions);
         }
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**
@@ -97,6 +94,6 @@ class RoleController extends Controller
         // Delete the role
         $role->delete();
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
+        return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
     }
 }

@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Pending Medical Worker Applications</h1>
-        <a href="{{ route('admin.medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <a href="{{ route('medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             <i class="fas fa-arrow-left mr-2"></i>
             Back to All Workers
         </a>
@@ -52,24 +52,24 @@
                             <div class="text-sm text-gray-900">{{ $worker->documents->count() }} documents</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.medical_workers.show', $worker) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <a href="{{ route('medical_workers.show', $worker) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <form action="{{ route('admin.medical_workers.verify', $worker) }}" method="POST" class="inline-block">
+                            <form action="{{ route('medical_workers.verify', $worker) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="text-green-600 hover:text-green-900 mr-3">
                                     <i class="fas fa-check"></i> Verify
                                 </button>
                             </form>
-                            <form action="{{ route('admin.medical_workers.approve', $worker) }}" method="POST" class="inline-block">
+                            <form action="{{ route('medical_workers.approve', $worker) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3">
                                     <i class="fas fa-thumbs-up"></i> Approve
                                 </button>
                             </form>
-                            <form action="{{ route('admin.medical_workers.reject', $worker) }}" method="POST" class="inline-block">
+                            <form action="{{ route('medical_workers.reject', $worker) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to reject this application?')">

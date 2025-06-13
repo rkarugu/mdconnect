@@ -93,7 +93,7 @@
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <h3 class="text-lg font-medium text-gray-800 mb-4">Document Verification</h3>
                 
-                <form action="{{ route('admin.medical_facilities.documents.verify', [$facility, $document]) }}" method="POST">
+                <form action="{{ route('medical_facilities.documents.verify', [$facility, $document]) }}" method="POST">
                     @csrf
                     
                     <div class="flex items-center space-x-4 mb-4">

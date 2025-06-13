@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Medical Facilities Ready for Approval</h1>
-        <a href="{{ route('admin.medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+        <a href="{{ route('medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
             <i class="fas fa-arrow-left mr-2"></i> Back to All Facilities
         </a>
     </div>
@@ -25,7 +25,7 @@
 
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
         <div class="p-4 border-b">
-            <form method="GET" action="{{ route('admin.medical_facilities.approval') }}" class="flex flex-wrap gap-4 items-end">
+            <form method="GET" action="{{ route('medical_facilities.approval') }}" class="flex flex-wrap gap-4 items-end">
                 <div class="flex-1 min-w-[250px]">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -36,7 +36,7 @@
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         <i class="fas fa-search mr-2"></i> Search
                     </button>
-                    <a href="{{ route('admin.medical_facilities.approval') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2">
+                    <a href="{{ route('medical_facilities.approval') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2">
                         <i class="fas fa-times mr-2"></i> Clear
                     </a>
                 </div>
@@ -114,12 +114,12 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="{{ route('admin.medical_facilities.show', $facility) }}" 
+                                    <a href="{{ route('medical_facilities.show', $facility) }}" 
                                         class="text-indigo-600 hover:text-indigo-900 mr-3">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                     
-                                    <form action="{{ route('admin.medical_facilities.approve', $facility) }}" method="POST" class="inline mr-2">
+                                    <form action="{{ route('medical_facilities.approve', $facility) }}" method="POST" class="inline mr-2">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-check-circle"></i> Approve
@@ -141,7 +141,7 @@
                                                     <p class="text-sm text-gray-500">
                                                         Please provide a reason for rejecting {{ $facility->facility_name }}.
                                                     </p>
-                                                    <form action="{{ route('admin.medical_facilities.reject', $facility) }}" method="POST" class="mt-3">
+                                                    <form action="{{ route('medical_facilities.reject', $facility) }}" method="POST" class="mt-3">
                                                         @csrf
                                                         <textarea name="status_reason" rows="3" 
                                                             class="w-full rounded border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 

@@ -4,14 +4,14 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-semibold text-gray-900">Add Medical Worker</h1>
-        <a href="{{ route('admin.medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <a href="{{ route('medical_workers.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             <i class="fas fa-arrow-left mr-2"></i>
             Back to List
         </a>
     </div>
 
     <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <form action="{{ route('admin.medical_workers.store') }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
+        <form action="{{ route('medical_workers.store') }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
             @csrf
             
             <div class="px-4 py-5 sm:p-6">

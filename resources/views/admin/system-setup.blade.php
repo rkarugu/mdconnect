@@ -14,7 +14,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Role Management</h3>
-                        <a href="{{ route('admin.roles.index') }}" class="btn btn-primary float-right">Manage Roles</a>
+                        <a href="{{ route('roles.index') }}" class="btn btn-primary float-right">Manage Roles</a>
                     </div>
                     <div class="card-body">
                         <ul>
@@ -31,7 +31,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">User Management</h3>
-                        <a href="{{ route('admin.users.index') }}" class="btn btn-primary float-right">Manage Users</a>
+                        <a href="{{ route('users.index') }}" class="btn btn-primary float-right">Manage Users</a>
                     </div>
                     <div class="card-body">
                         <ul>

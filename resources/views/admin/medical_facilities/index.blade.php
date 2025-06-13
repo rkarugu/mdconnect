@@ -10,7 +10,7 @@
 
     <!-- Search and Filter -->
     <div class="bg-white rounded-lg shadow mb-6 p-4">
-        <form action="{{ route('admin.medical_facilities.index') }}" method="GET" class="flex flex-wrap gap-4">
+        <form action="{{ route('medical_facilities.index') }}" method="GET" class="flex flex-wrap gap-4">
             <div class="flex-1 min-w-[200px]">
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                 <input type="text" name="search" id="search" value="{{ request('search') }}" 
@@ -120,7 +120,7 @@
                                         </div>
                                         <div>
                                             <span class="text-xs font-medium text-gray-900">{{ $approvedDocs }}/{{ $totalDocs }}</span>
-                                            <a href="{{ route('admin.medical_facilities.documents', $facility) }}" class="ml-2 text-xs text-blue-600 hover:text-blue-800">
+                                            <a href="{{ route('medical_facilities.documents', $facility) }}" class="ml-2 text-xs text-blue-600 hover:text-blue-800">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         </div>
@@ -133,11 +133,11 @@
                                 {{ $facility->created_at->format('M d, Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('admin.medical_facilities.show', $facility) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <a href="{{ route('medical_facilities.show', $facility) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 @if($facility->status == 'pending')
-                                    <form action="{{ route('admin.medical_facilities.verify', $facility) }}" method="POST" class="inline">
+                                    <form action="{{ route('medical_facilities.verify', $facility) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900 mr-3 bg-transparent border-0 p-0 cursor-pointer">
                                             <i class="fas fa-check-circle"></i> Verify
@@ -145,13 +145,13 @@
                                     </form>
                                 @endif
                                 @if($facility->status == 'verified')
-                                    <form action="{{ route('admin.medical_facilities.approve', $facility) }}" method="POST" class="inline">
+                                    <form action="{{ route('medical_facilities.approve', $facility) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900 mr-3">
                                             <i class="fas fa-thumbs-up"></i> Approve
                                         </button>
                                     </form>
-                                    <form action="{{ route('admin.medical_facilities.reject', $facility) }}" method="POST" class="inline">
+                                    <form action="{{ route('medical_facilities.reject', $facility) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-red-600 hover:text-red-900">
                                             <i class="fas fa-thumbs-down"></i> Reject
@@ -159,7 +159,7 @@
                                     </form>
                                 @endif
                                 @if($facility->status == 'approved')
-                                    <form action="{{ route('admin.medical_facilities.suspend', $facility) }}" method="POST" class="inline">
+                                    <form action="{{ route('medical_facilities.suspend', $facility) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-yellow-600 hover:text-yellow-900">
                                             <i class="fas fa-ban"></i> Suspend
@@ -167,7 +167,7 @@
                                     </form>
                                 @endif
                                 @if($facility->status == 'suspended' || $facility->status == 'rejected')
-                                    <form action="{{ route('admin.medical_facilities.reinstate', $facility) }}" method="POST" class="inline">
+                                    <form action="{{ route('medical_facilities.reinstate', $facility) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900">
                                             <i class="fas fa-redo"></i> Reinstate

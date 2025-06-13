@@ -7,10 +7,10 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Verify Facility Documents</h1>
         <div class="flex space-x-2">
-            <a href="{{ route('admin.medical_facilities.documents.upload', $medical_facility) }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            <a href="{{ route('medical_facilities.documents.upload', $medical_facility) }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                 <i class="fas fa-upload mr-2"></i> Upload New Documents
             </a>
-            <a href="{{ route('admin.medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+            <a href="{{ route('medical_facilities.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Facilities
             </a>
         </div>
@@ -63,7 +63,7 @@
             
             <div class="flex flex-wrap gap-2">
                 @if($documents->where('status', 'pending')->count() > 0)
-                    <form action="{{ route('admin.medical_facilities.documents.verify_all', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.documents.verify_all', $medical_facility) }}" method="POST">
                         @csrf
                         <input type="hidden" name="status" value="approved">
                         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
@@ -73,7 +73,7 @@
                 @endif
                 
                 @if($documents->count() > 0 && $documents->where('status', 'pending')->count() == 0 && $medical_facility->status == 'pending')
-                    <form action="{{ route('admin.medical_facilities.verify', $medical_facility) }}" method="POST">
+                    <form action="{{ route('medical_facilities.verify', $medical_facility) }}" method="POST">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                             <i class="fas fa-check-circle mr-2"></i> Verify Facility
@@ -151,14 +151,14 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
-                                            <a href="{{ route('admin.medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
+                                            <a href="{{ route('medical_facilities.documents.preview', [$medical_facility, $document]) }}" 
                                                target="_blank"
                                                class="text-blue-600 hover:text-blue-900">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
                                             
                                             @if($document->status == 'pending')
-                                                <form action="{{ route('admin.medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST" class="inline">
+                                                <form action="{{ route('medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST" class="inline">
                                                     @csrf
                                                     <input type="hidden" name="status" value="approved">
                                                     <button type="submit" class="text-green-600 hover:text-green-900">
@@ -176,7 +176,7 @@
                                         
                                         <!-- Hidden Rejection Form -->
                                         <div id="reject-form-{{ $document->id }}" class="hidden mt-2 bg-gray-50 p-2 rounded">
-                                            <form action="{{ route('admin.medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST">
+                                            <form action="{{ route('medical_facilities.documents.verify', [$medical_facility, $document]) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="status" value="rejected">
                                                 <div class="mb-2">

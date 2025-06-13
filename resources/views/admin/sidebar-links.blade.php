@@ -1,16 +1,21 @@
 <!-- Main Navigation -->
 <li>
     <div class="space-y-1">
+        <!-- Brand logo -->
+        <a href="{{ route('dashboard') }}" class="flex h-16 shrink-0 items-center border-b border-gray-800 px-4">
+            <img class="h-10 w-auto" src="{{ asset('images/mediconnect_logo.svg') }}" alt="MediConnect">
+        </a>
+
         <!-- Dashboard -->
-        <a href="{{ route('admin.dashboard') }}" 
-           class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+        <a href="{{ route('dashboard') }}" 
+           class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('dashboard') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
             <i class="fas fa-tachometer-alt flex-shrink-0 h-6 w-6"></i>
             Dashboard
         </a>
 
         <!-- Medical Workers -->
-        <a href="{{ route('admin.medical_workers') }}" 
-           class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('admin.medical_workers') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+        <a href="{{ route('medical_workers.index') }}" 
+           class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('medical_workers.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
             <i class="fas fa-user-md flex-shrink-0 h-6 w-6"></i>
             Medical Workers
         </a>
@@ -19,10 +24,10 @@
 
 <!-- Settings Section -->
 <li>
-    <div class="space-y-1" x-data="{ settingsOpen: {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.settings.*') ? 'true' : 'false' }} }">
+    <div class="space-y-1" x-data="{ settingsOpen: {{ request()->routeIs('users.*', 'admin.roles.*', 'admin.settings.*') ? 'true' : 'false' }} }">
         <!-- Settings Header -->
         <button type="button" 
-                class="flex items-center w-full gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.settings.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}"
+                class="flex items-center w-full gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 {{ request()->routeIs('users.*', 'admin.roles.*', 'admin.settings.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}"
                 @click="settingsOpen = !settingsOpen">
             <i class="fas fa-cogs flex-shrink-0 h-6 w-6"></i>
             Settings
@@ -31,18 +36,18 @@
 
         <!-- Settings Submenu -->
         <div class="mt-1 space-y-1" x-show="settingsOpen" x-collapse>
-            <a href="{{ route('admin.users.index') }}"
-               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('admin.users.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('users.index') }}"
+               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('users.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <i class="fas fa-users flex-shrink-0 h-5 w-5"></i>
                 Users
             </a>
-            <a href="{{ route('admin.roles.index') }}"
-               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('admin.roles.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('roles.index') }}"
+               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('roles.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <i class="fas fa-shield-alt flex-shrink-0 h-5 w-5"></i>
                 Roles
             </a>
-            <a href="{{ route('admin.settings') }}"
-               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('admin.settings.*') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <a href="{{ route('settings') }}"
+               class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-semibold leading-6 pl-11 {{ request()->routeIs('settings') ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
                 <i class="fas fa-sliders-h flex-shrink-0 h-5 w-5"></i>
                 System Settings
             </a>
