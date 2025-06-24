@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\User;
 use App\Models\MedicalSpecialty;
 use App\Models\MedicalDocument;
+use App\Models\Shift;
 
 class MedicalWorker extends Authenticatable
 {
@@ -96,6 +97,14 @@ class MedicalWorker extends Authenticatable
     public function documents(): HasMany
     {
         return $this->hasMany(MedicalDocument::class);
+    }
+
+    /**
+     * Get the shifts associated with this medical worker.
+     */
+    public function shifts(): HasMany
+    {
+        return $this->hasMany(Shift::class);
     }
 
     /**
