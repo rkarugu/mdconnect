@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         // Run email health check weekly
         $schedule->command('email:health-check')->weekly()->mondays()->at('09:00');
+
+        // Expire unattended locum shifts every hour
+        $schedule->command('shifts:expire')->hourly();
     }
 
     /**

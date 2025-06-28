@@ -34,8 +34,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
-            // Medical Worker API routes
-            $this->mapMedicalWorkerApiRoutes();
+
 
             // Web routes
             Route::middleware('web')
@@ -43,15 +42,4 @@ class RouteServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Define the "medical worker api" routes for the application.
-     *
-     * @return void
-     */
-    protected function mapMedicalWorkerApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api')
-            ->group(base_path('routes/api_medical_worker.php'));
-    }
 }

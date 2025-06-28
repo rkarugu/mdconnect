@@ -17,12 +17,17 @@ return [
 
     // During local development you can leave "*". In production replace with
     // your actual frontend domain(s).
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [],
+
+    'allowed_origins_patterns' => [
+        '/^http:\/\/localhost(:\d+)?$/',
+        '/^http:\/\/127\.0\.0\.1(:\d+)?$/'
+    ],
 
     'allowed_methods'   => ['*'],
     'allowed_headers'   => ['*'],
     'exposed_headers'   => ['Authorization'],
 
     'max_age' => 0,
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 ];

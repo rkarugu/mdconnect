@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\LocumShift;
 
 class InstantRequest extends Model
 {
@@ -22,9 +23,9 @@ class InstantRequest extends Model
         'expires_at' => 'datetime',
     ];
 
-    public function shift()
+    public function locumShift()
     {
-        return $this->belongsTo(Shift::class);
+        return $this->belongsTo(LocumShift::class, 'shift_id');
     }
 
     public function medicalWorker()

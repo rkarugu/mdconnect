@@ -79,6 +79,9 @@ class MedicalFacilityController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->save();
+
+            // Assign 'Facility Admin' role to the new user
+            $user->assignRole('Facility Admin');
             
             // Create medical facility
             $facility = new MedicalFacility();

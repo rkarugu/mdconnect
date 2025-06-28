@@ -8,9 +8,24 @@ use Illuminate\Http\Request; // Added for type hinting
 use Illuminate\Http\JsonResponse; // Added for type hinting
 use Illuminate\Validation\ValidationException; // Added for type hinting
 use Illuminate\Support\Arr; // Added for Arr::except
+use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
+    /**
+     * Convert an authentication exception into a response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Auth\AuthenticationException  $exception
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return $request->expectsJson()
+                    ? response()->json(['message' => $exception->getMessage()], 401)
+                    : redirect()->guest($exception->redirectTo() ?? route('login'));
+    }
+
     /**
      * A list of the exception types that are not reported.
      *

@@ -89,16 +89,18 @@ class MedicalWorkerAuthController extends Controller
             ], 422);
         }
 
-        // Check if medical worker exists
-        Log::debug('Attempting to find medical worker by email: ' . $request->email);
-        $medicalWorker = MedicalWorker::where('email', $request->email)->first();
+        $credentials = $request->only('email', 'password');
+        Log::debug('Attempting to authenticate medical worker with guard.', ['credentials' => $credentials]);
 
-        if (!$medicalWorker || !Hash::check($request->password, $medicalWorker->password)) {
-            Log::warning('MEDICAL_WORKER_LOGIN_FAILED', ['email' => $request->email, 'reason' => 'Invalid credentials']);
+        if (!auth()->guard('medical-worker')->attempt($credentials)) {
+            Log::warning('MEDICAL_WORKER_LOGIN_FAILED', ['email' => $request->email, 'reason' => 'Invalid credentials from Auth facade']);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
+
+        $request->session()->regenerate();
+        $medicalWorker = auth()->guard('medical-worker')->user();
 
         // Check if the medical worker is approved
         Log::debug('Checking approval status for worker: ' . $medicalWorker->id);

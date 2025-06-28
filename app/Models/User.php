@@ -19,6 +19,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'role_id',
+        'medical_specialty_id',
         'profile_picture',
     ];
 
@@ -43,6 +44,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function medicalSpecialty(): BelongsTo
+    {
+        return $this->belongsTo(MedicalSpecialty::class);
+    }
+
     /**
      * Check if user has a specific role by name.
      */
@@ -58,6 +64,30 @@ class User extends Authenticatable
         }
 
         return $userRoleName === $expectedRoleName;
+    }
+
+    /**
+     * Check if user has any of the given roles.
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        $userRoleName = strtolower(optional($this->role)->name);
+        if (!$userRoleName) {
+            return false;
+        }
+
+        foreach ($roles as $roleName) {
+            $expectedRoleName = str_replace('-', ' ', strtolower($roleName));
+            if ($userRoleName === $expectedRoleName) {
+                return true;
+            }
+            // Allow admin to access super-admin things
+            if ($expectedRoleName === 'admin' && $userRoleName === 'super admin') {
+                return true;
+            }
+        }
+
+        return false;
     }
     
     /**

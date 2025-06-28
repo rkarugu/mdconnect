@@ -3,6 +3,9 @@
 @section('title', 'Edit User')
 
 @section('content')
+@php
+    $medicalWorkerRoleId = $roles->firstWhere('name', 'Medical Worker')?->id;
+@endphp
 <div class="max-w-2xl mx-auto">
     <div class="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
@@ -38,7 +41,7 @@
     @endif
 
     <div class="bg-white shadow sm:rounded-lg">
-        <form action="{{ route('users.update', $user->id) }}" method="POST" class="space-y-6 p-6">
+        <form x-data="{ roleId: '{{ old('role_id', $user->role_id) }}' }" action="{{ route('users.update', $user->id) }}" method="POST" class="space-y-6 p-6">
             @csrf
             @method('PUT')
 
@@ -69,12 +72,28 @@
             <div>
                 <label for="role_id" class="block text-sm font-medium leading-6 text-gray-900">Role</label>
                 <div class="mt-2">
-                    <select name="role_id" id="role_id" required 
+                    <select name="role_id" id="role_id" x-model="roleId" required 
                             class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
                         <option value="">Select a role</option>
                         @foreach($roles as $role)
                             <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
                                 {{ $role->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <!-- Medical Specialty Dropdown -->
+            <div x-show="roleId == '{{ $medicalWorkerRoleId }}'" x-cloak>
+                <label for="medical_specialty_id" class="block text-sm font-medium leading-6 text-gray-900">Medical Specialty</label>
+                <div class="mt-2">
+                    <select name="medical_specialty_id" id="medical_specialty_id"
+                            class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                        <option value="">Select a specialty</option>
+                        @foreach($specialties as $specialty)
+                            <option value="{{ $specialty->id }}" {{ old('medical_specialty_id', $user->medical_specialty_id) == $specialty->id ? 'selected' : '' }}>
+                                {{ $specialty->name }}
                             </option>
                         @endforeach
                     </select>
@@ -88,6 +107,16 @@
                 </label>
                 <div class="mt-2">
                     <input type="password" name="password" id="password"
+                           class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
+                </div>
+            </div>
+
+            <div>
+                <label for="password_confirmation" class="block text-sm font-medium leading-6 text-gray-900">
+                    Confirm New Password
+                </label>
+                <div class="mt-2">
+                    <input type="password" name="password_confirmation" id="password_confirmation"
                            class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6">
                 </div>
             </div>

@@ -16,8 +16,14 @@ use App\Http\Controllers\Admin\MedicalWorkerController;
 use App\Http\Controllers\Admin\MedicalSpecialtyController;
 use App\Http\Controllers\Admin\MedicalDocumentController;
 use App\Http\Controllers\Admin\MedicalFacilityController as AdminMedicalFacilityController;
+use App\Http\Controllers\Web\Facility\LocumShiftController as WebLocumShiftController;
+use App\Http\Controllers\Web\Facility\ShiftApplicationController as WebShiftApplicationController;
 use App\Models\MedicalWorker; // Added for password reset
 use Illuminate\Support\Facades\Hash; // Added for password reset
+use App\Http\Controllers\Web\Facility\DashboardController as FacilityDashboardController;
+use App\Http\Controllers\Api\MedicalWorkerAuthController;
+use App\Http\Controllers\Api\MedicalWorkerDashboardController;
+use App\Http\Controllers\Api\Worker\LocumShiftController as ApiWorkerLocumShiftController;
 
 
 // Temporary route to reset Ayden's password
@@ -199,6 +205,12 @@ Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->group(function 
 | Medical Facilities Routes (Without Admin Prefix in Route Names)
 |--------------------------------------------------------------------------
 */
+// This is what the group should look like
+Route::middleware(['auth', 'role:facility-admin'])->prefix('facility')->name('facility.')->group(function () {
+    Route::get('dashboard', [FacilityDashboardController::class, 'index'])->name('dashboard'); // Add this line
+    Route::resource('locum-shifts', WebLocumShiftController::class);
+    Route::post('locum-shifts/{locum_shift}/applications/{medical_worker}/accept', [WebShiftApplicationController::class, 'accept'])->name('locum-shifts.applications.accept');
+});
 Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->group(function () {
     // Remove any name prefix for this specific group
     Route::name('')->group(function () {
@@ -363,4 +375,8 @@ Route::post('/medical-workers/register', [\App\Http\Controllers\MedicalWorkerCon
 | Authentication Routes
 |--------------------------------------------------------------------------
 */
+
+
+
+
 require __DIR__.'/auth.php';

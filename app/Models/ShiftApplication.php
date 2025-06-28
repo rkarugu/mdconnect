@@ -3,27 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\LocumShift;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class BidInvitation extends Model
+class ShiftApplication extends Model
 {
-    use SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'shift_id',
         'medical_worker_id',
-        'minimum_bid',
-        'closes_at',
         'status',
+        'applied_at',
+        'selected_at',
     ];
 
-    protected $casts = [
-        'minimum_bid' => 'decimal:2',
-        'closes_at' => 'datetime',
-    ];
-
-    public function locumShift()
+    public function shift()
     {
         return $this->belongsTo(LocumShift::class, 'shift_id');
     }

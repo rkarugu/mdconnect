@@ -11,8 +11,35 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::paginate(10); // Show 10 users per page
-        return view('admin.users.index', compact('users'));
+        // Define role names for categorization
+        $systemRoles = ['Super Admin', 'Admin'];
+        $facilityAdminRole = 'Facility Admin';
+        $medicalWorkerRoles = ['Medical Worker', 'Doctor', 'Nurse']; // Expanded roles
+
+        // Fetch users for each category
+        $systemUsers = User::whereHas('role', function ($query) use ($systemRoles) {
+            $query->whereIn('name', $systemRoles);
+        })->paginate(10, ['*'], 'system_users_page');
+
+        $facilityAdmins = User::whereHas('role', function ($query) use ($facilityAdminRole) {
+            $query->where('name', $facilityAdminRole);
+        })->paginate(10, ['*'], 'facility_admins_page');
+
+        $medicalWorkers = User::whereHas('role', function ($query) use ($medicalWorkerRoles) {
+            $query->whereIn('name', $medicalWorkerRoles);
+        })->paginate(10, ['*'], 'medical_workers_page');
+
+        // Combine all categorized roles
+        $categorizedRoles = array_merge($systemRoles, [$facilityAdminRole], $medicalWorkerRoles);
+
+        // Fetch users that are not in the categorized roles or have no role
+        $otherUsers = User::where(function ($query) use ($categorizedRoles) {
+            $query->whereHas('role', function ($subQuery) use ($categorizedRoles) {
+                $subQuery->whereNotIn('name', $categorizedRoles);
+            })->orWhereDoesntHave('role');
+        })->paginate(10, ['*'], 'other_users_page');
+
+        return view('admin.users.index', compact('systemUsers', 'facilityAdmins', 'medicalWorkers', 'otherUsers'));
     }
 
     public function create()
@@ -47,8 +74,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $roles = Role::all(); // Fetch all roles from DB
-        return view('admin.users.edit', compact('user', 'roles')); // Pass both $user and $roles to the view
+        $roles = Role::all();
+        $specialties = \App\Models\MedicalSpecialty::where('is_active', true)->get();
+        return view('admin.users.edit', compact('user', 'roles', 'specialties'));
     }
 
     public function update(Request $request, User $user)
@@ -57,16 +85,17 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'required|string|max:20',
-        'role' => 'required|exists:roles,id',
-        'password' => 'nullable|string|min:6|confirmed', // password confirmation is optional
-            
+            'role_id' => 'required|exists:roles,id',
+            'password' => 'nullable|string|min:6|confirmed',
+            'medical_specialty_id' => 'nullable|exists:medical_specialties,id',
         ]);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'role_id' => $request->role,
+            'role_id' => $request->role_id,
+            'medical_specialty_id' => $request->medical_specialty_id,
         ];
     
         // Only update password if provided

@@ -10,8 +10,12 @@ class RoleSeeder extends Seeder
     public function run()
     {
         $roles = [
+            'Super Admin',
             'Admin',
+            'Facility Admin',
             'Medical Worker',
+            'Doctor',
+            'Nurse',
             'User'
         ];
 

@@ -21,7 +21,7 @@ class MedicalWorker extends Authenticatable
         'name',
         'email',
         'password',
-        'specialty_id',
+        'medical_specialty_id',
         'license_number',
         'years_of_experience',
         'bio',
@@ -88,7 +88,7 @@ class MedicalWorker extends Authenticatable
      */
     public function specialty(): BelongsTo
     {
-        return $this->belongsTo(MedicalSpecialty::class);
+        return $this->belongsTo(MedicalSpecialty::class, 'medical_specialty_id');
     }
 
     /**
@@ -106,6 +106,8 @@ class MedicalWorker extends Authenticatable
     {
         return $this->hasMany(Shift::class);
     }
+
+
 
     /**
      * Scope a query to only include approved medical workers.
