@@ -24,6 +24,7 @@ use App\Http\Controllers\Web\Facility\DashboardController as FacilityDashboardCo
 use App\Http\Controllers\Api\MedicalWorkerAuthController;
 use App\Http\Controllers\Api\MedicalWorkerDashboardController;
 use App\Http\Controllers\Api\Worker\LocumShiftController as ApiWorkerLocumShiftController;
+use App\Http\Controllers\Web\Facility\WalletController;
 
 
 // Temporary route to reset Ayden's password
@@ -63,6 +64,14 @@ Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->get('/dashboard
 Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->group(function () {
     // Remove any name prefix for this specific group
     Route::name('')->group(function () {
+        // Wallet Management
+        Route::get('/wallets', [\App\Http\Controllers\Admin\AdminWalletController::class, 'index'])->name('admin.wallets.dashboard');
+        Route::get('/wallets/facility/{id}', [\App\Http\Controllers\Admin\AdminWalletController::class, 'facility'])->name('admin.wallets.facility');
+        Route::get('/wallets/worker/{id}', [\App\Http\Controllers\Admin\AdminWalletController::class, 'worker'])->name('admin.wallets.worker');
+        Route::get('/wallets/payouts', [\App\Http\Controllers\Admin\AdminWalletController::class, 'payouts'])->name('admin.wallets.payouts');
+        Route::patch('/wallets/payouts/{payout}/approve', [\App\Http\Controllers\Admin\AdminWalletController::class, 'approve'])->name('admin.wallets.payouts.approve');
+        Route::patch('/wallets/payouts/{payout}/reject', [\App\Http\Controllers\Admin\AdminWalletController::class, 'reject'])->name('admin.wallets.payouts.reject');
+
         // System Settings
         Route::get('/settings', [SystemSettingsController::class, 'index'])->name('settings');
 
@@ -79,6 +88,13 @@ Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->group(function 
         });
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Facility Wallet Routes
+|--------------------------------------------------------------------------
+*/
+require __DIR__.'/facility/wallet.php';
 
 /*
 |--------------------------------------------------------------------------

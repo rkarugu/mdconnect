@@ -34,11 +34,19 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
-
-
             // Web routes
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
+                
+            // Facility wallet routes
+            Route::middleware('web')
+                ->group(base_path('routes/facility/wallet.php'));
+                
+            // Debug routes (only in local environment)
+            if (app()->environment('local')) {
+                Route::middleware('web')
+                    ->group(base_path('routes/web_debug.php'));
+            }
         });
     }
 

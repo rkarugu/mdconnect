@@ -4,6 +4,12 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
+    @if(session('status'))
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+            <p>{{ session('status') }}</p>
+        </div>
+    @endif
+    
     <a href="{{ route('facility.locum-shifts.index') }}" class="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6">
         <i class="fas fa-arrow-left mr-2"></i>
         Back to All Shifts
@@ -93,7 +99,20 @@
                                 </form>
                             </div>
                             @elseif($application->status == 'approved')
-                                <span class="text-green-600 font-semibold">Accepted on {{ $application->selected_at ? \Illuminate\Support\Carbon::parse($application->selected_at)->format('M j, Y') : '' }}</span>
+                                <div class="space-y-2">
+                                    @if(in_array(strtolower($locumShift->status), ['open', 'in_progress', 'in-progress']))
+                                        <form id="endShiftForm-{{ $application->id }}" action="{{ route('api.facility.locum-shifts.update', $locumShift->id) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="filled">
+                                            <button type="button" 
+                                                    onclick="confirmEndShift('{{ $application->id }}')" 
+                                                    class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded-full transition duration-300">
+                                                End Shift
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             @else
                                 -
                             @endif
@@ -108,4 +127,40 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function confirmEndShift(applicationId) {
+        if (confirm('Are you sure you want to end this shift? This action cannot be undone.')) {
+            const form = document.getElementById('endShiftForm-' + applicationId);
+            const formData = new FormData(form);
+            const url = form.action;
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString()
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show success message
+                alert('Shift has been ended successfully!');
+                // Reload the page to reflect changes
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while ending the shift. Please try again.');
+            });
+        }
+    }
+</script>
+@endpush
+
 @endsection

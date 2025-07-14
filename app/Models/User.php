@@ -22,6 +22,14 @@ class User extends Authenticatable
         'medical_specialty_id',
         'profile_picture',
     ];
+    
+    /**
+     * Get the facility associated with the user (if the user is a facility admin).
+     */
+    public function facility(): HasOne
+    {
+        return $this->hasOne(MedicalFacility::class, 'user_id');
+    }
 
     protected $hidden = [
         'password',

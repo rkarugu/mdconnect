@@ -31,6 +31,10 @@ Route::middleware('auth:sanctum')->prefix('worker')->name('worker.')->group(func
     Route::post('shifts/instant-requests/{id}/accept', [MedicalWorkerDashboardController::class, 'acceptInstantRequest'])->name('shifts.instant-requests.accept');
     Route::post('shifts/bid-invitations/{id}/apply', [MedicalWorkerDashboardController::class, 'applyToBidInvitation'])->name('shifts.bid-invitations.apply');
 
+    // Wallet routes
+    Route::get('wallet', [\App\Http\Controllers\Api\Worker\WalletController::class, 'show'])->name('wallet');
+    Route::get('wallet/transactions', [\App\Http\Controllers\Api\Worker\WalletController::class, 'transactions'])->name('wallet.transactions');
+
     // Locum Shifts for Workers
     Route::get('locum-shifts/available', [ApiWorkerLocumShiftController::class, 'availableShifts'])->name('locum-shifts.available');
     Route::post('locum-shifts/{locum_shift}/apply', [ApiWorkerLocumShiftController::class, 'apply'])->name('locum-shifts.apply');
@@ -44,4 +48,9 @@ Route::middleware(['auth:sanctum', 'role:facility-admin'])->prefix('facility')->
     Route::apiResource('locum-shifts', LocumShiftController::class);
     Route::get('locum-shifts/{locum_shift}/applicants', [ShiftApplicationController::class, 'index'])->name('locum-shifts.applicants.index');
     Route::post('locum-shifts/{locum_shift}/accept/{medical_worker}', [ShiftApplicationController::class, 'accept'])->name('locum-shifts.applicants.accept');
+
+    // Wallet routes for Facility
+    Route::get('wallet', [\App\Http\Controllers\Api\Facility\FacilityWalletController::class, 'show'])->name('wallet');
+    Route::get('wallet/transactions', [\App\Http\Controllers\Api\Facility\FacilityWalletController::class, 'transactions'])->name('wallet.transactions');
+    Route::post('wallet/top-up', [\App\Http\Controllers\Api\Facility\FacilityWalletController::class, 'topUp'])->name('wallet.top-up');
 });

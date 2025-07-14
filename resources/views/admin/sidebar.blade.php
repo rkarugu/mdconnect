@@ -61,6 +61,26 @@
                     </div>
                 </div>
 
+                <!-- Financials Section -->
+                <div x-data="{ open: {{ request()->routeIs('admin.wallets.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" 
+                            class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.wallets.*') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <i class="fas fa-wallet w-6 h-6 mr-3 {{ request()->routeIs('admin.wallets.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                        <span class="flex-1">Financials</span>
+                        <i class="fas fa-chevron-down w-5 h-5 transform transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" class="mt-1 pl-6">
+                        <a href="{{ route('admin.wallets.dashboard') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.wallets.dashboard') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-wallet w-5 h-5 mr-3"></i> Wallets
+                        </a>
+                        <a href="{{ route('admin.wallets.payouts') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.wallets.payouts') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-money-check-alt w-5 h-5 mr-3"></i> Payouts
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Settings Menu -->
                 <div x-data="{ open: {{ request()->routeIs('users.*', 'admin.roles.*', 'admin.settings.*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" 
@@ -102,6 +122,26 @@
                         <a href="{{ route('facility.locum-shifts.create') }}" 
                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('facility.locum-shifts.create') ? 'text-blue-600' : 'text-gray-600' }}">
                             <i class="fas fa-plus-circle w-6 h-6 mr-3"></i> Create Shift
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Financials Section for Facility -->
+                <div x-data="{ open: {{ request()->routeIs('facility.wallet.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" 
+                            class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('facility.wallet.*') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <i class="fas fa-wallet w-6 h-6 mr-3 {{ request()->routeIs('facility.wallet.*') ? 'text-blue-600' : 'text-gray-400' }}"></i>
+                        <span class="flex-1">Financials</span>
+                        <i class="fas fa-chevron-down w-5 h-5 transform transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" class="mt-1 pl-6 space-y-1">
+                        <a href="{{ route('facility.wallet.show') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('facility.wallet.show') ? 'text-blue-600' : 'text-gray-600' }}">
+                            <i class="fas fa-wallet w-5 h-5 mr-3"></i> My Wallet
+                        </a>
+                        <a href="{{ route('facility.wallet.payouts') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('facility.wallet.payouts') ? 'text-blue-600' : 'text-gray-600' }}">
+                            <i class="fas fa-money-check-alt w-5 h-5 mr-3"></i> Payouts
                         </a>
                     </div>
                 </div>

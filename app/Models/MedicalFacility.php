@@ -75,6 +75,29 @@ class MedicalFacility extends Model
     }
 
     /**
+     * Get the wallet associated with the facility.
+     */
+    public function wallet(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\FacilityWallet::class, 'medical_facility_id');
+    }
+
+    /**
+     * Get all payout requests for this facility.
+     */
+    public function payoutRequests(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(
+            \App\Models\PayoutRequest::class,
+            \App\Models\FacilityWallet::class,
+            'medical_facility_id', // Foreign key on FacilityWallet table
+            'wallet_id', // Foreign key on PayoutRequest table
+            'id', // Local key on MedicalFacility table
+            'id' // Local key on FacilityWallet table
+        );
+    }
+
+    /**
      * Check if the medical facility is approved.
      */
     public function isApproved(): bool
