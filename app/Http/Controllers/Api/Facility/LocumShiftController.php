@@ -67,6 +67,14 @@ class LocumShiftController extends Controller
             'instant_book' => 'sometimes|boolean',
         ]);
 
+        // Check if status is being updated to 'filled'
+        if ($request->has('status') && $request->status === 'filled' && $locumShift->status !== 'filled') {
+            $request->merge([
+                'ended_at' => now(),
+                'ended_by' => auth()->id()
+            ]);
+        }
+
         $locumShift->update($request->all());
 
         return response()->json($locumShift);

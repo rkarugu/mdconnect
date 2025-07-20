@@ -23,6 +23,8 @@ class LocumShift extends Model
         'auto_match',
         'instant_book',
         'created_by',
+        'ended_at',
+        'ended_by',
     ];
 
     protected $casts = [
@@ -50,6 +52,14 @@ class LocumShift extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who ended the shift.
+     */
+    public function endedBy()
+    {
+        return $this->belongsTo(User::class, 'ended_by');
     }
 
     public function applications()

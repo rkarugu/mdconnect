@@ -34,6 +34,14 @@
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Shift Time</h3>
                     <p class="mt-1 text-lg text-gray-900">{{ $locumShift->start_datetime->format('g:i A') }} - {{ $locumShift->end_datetime->format('g:i A') }} ({{ $locumShift->start_datetime->diffInHours($locumShift->end_datetime) }} hrs)</p>
+                    @if($locumShift->ended_at)
+                        <p class="mt-2 text-sm text-gray-500">
+                            <span class="font-medium">Ended:</span> {{ $locumShift->ended_at->format('M j, Y g:i A') }}
+                            @if($locumShift->endedBy)
+                                <br><span class="font-medium">By:</span> {{ $locumShift->endedBy->name }}
+                            @endif
+                        </p>
+                    @endif
                 </div>
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Hourly Rate</h3>
