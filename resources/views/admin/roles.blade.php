@@ -1,12 +1,13 @@
-@extends('adminlte::page')
-
-@section('title', 'Role Management')
-
-@section('content_header')
-    <h1>Role Management</h1>
-@endsection
+@extends('layouts.app')
 
 @section('content')
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-semibold text-gray-900">Role Management</h1>
+            <p class="text-gray-600 mt-1">Manage user roles and permissions</p>
+        </div>
+    </div>
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title">Roles</h3>

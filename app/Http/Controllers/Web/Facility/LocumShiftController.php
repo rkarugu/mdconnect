@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Web\Facility;
 
 use App\Http\Controllers\Controller;
-use App\Models\LocumShift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
+use App\Models\LocumShift;
+use App\Models\MedicalFacility;
+use App\Models\MedicalWorker;
+use App\Models\MedicalSpecialty;
+use App\Notifications\NewShiftAvailable;
 use Carbon\Carbon;
 
 class LocumShiftController extends Controller
@@ -72,6 +77,12 @@ class LocumShiftController extends Controller
         $shift->created_by = Auth::id();
         $shift->status = 'open';
         $shift->save();
+
+        // Load the facility relationship for the notification
+        $shift->load('facility');
+
+        // Notify medical workers who match the required specialty
+        $this->notifyEligibleMedicalWorkers($shift);
 
         return redirect()->route('facility.locum-shifts.index')
             ->with('success', 'Locum shift created successfully.');
@@ -151,5 +162,52 @@ class LocumShiftController extends Controller
 
         return redirect()->route('facility.locum-shifts.index')
             ->with('success', 'Locum shift and all its pending applications have been deleted.');
+    }
+
+    /**
+     * Notify medical workers who match the shift requirements
+     */
+    private function notifyEligibleMedicalWorkers(LocumShift $shift)
+    {
+        try {
+            // Find the specialty that matches the worker_type
+            $specialty = MedicalSpecialty::where('name', $shift->worker_type)->first();
+            
+            if (!$specialty) {
+                \Log::warning('Specialty not found for shift notification', [
+                    'shift_id' => $shift->id,
+                    'worker_type' => $shift->worker_type
+                ]);
+                return;
+            }
+
+            // Get medical workers who match the specialty and are available
+            $eligibleWorkers = MedicalWorker::where('medical_specialty_id', $specialty->id)
+                ->where('status', 'approved')
+                ->where('is_available', true)
+                ->get();
+
+            if ($eligibleWorkers->isEmpty()) {
+                \Log::info('No eligible workers found for shift notification', [
+                    'shift_id' => $shift->id,
+                    'specialty_id' => $specialty->id
+                ]);
+                return;
+            }
+
+            // Send notification to all eligible workers
+            Notification::send($eligibleWorkers, new NewShiftAvailable($shift));
+
+            \Log::info('Shift notifications sent successfully', [
+                'shift_id' => $shift->id,
+                'workers_notified' => $eligibleWorkers->count()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to send shift notifications', [
+                'shift_id' => $shift->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

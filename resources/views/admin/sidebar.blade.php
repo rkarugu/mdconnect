@@ -61,6 +61,43 @@
                     </div>
                 </div>
 
+                <!-- Patient Management Section -->
+                <div x-data="{ open: {{ request()->routeIs('admin.patients.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" 
+                            class="group flex items-center w-full px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.*') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <i class="fas fa-users-medical w-6 h-6 mr-3 {{ request()->routeIs('admin.patients.*') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                        <span class="flex-1">Patient Management</span>
+                        <i class="fas fa-chevron-down w-5 h-5 transform transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    <div x-show="open" class="mt-1 pl-6">
+                        <a href="{{ route('admin.patients.dashboard') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.dashboard') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-chart-bar w-5 h-5 mr-3 {{ request()->routeIs('admin.patients.dashboard') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                            Dashboard
+                        </a>
+                        <a href="{{ route('admin.patients.list') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.list') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-list w-5 h-5 mr-3 {{ request()->routeIs('admin.patients.list') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                            All Patients
+                        </a>
+                        <a href="{{ route('admin.patients.create') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.create') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-user-plus w-5 h-5 mr-3 {{ request()->routeIs('admin.patients.create') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                            Add Patient
+                        </a>
+                        <a href="{{ route('admin.patients.analytics') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.analytics') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-chart-pie w-5 h-5 mr-3 {{ request()->routeIs('admin.patients.analytics') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                            Analytics
+                        </a>
+                        <a href="{{ route('admin.patients.export') }}" 
+                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.patients.export') ? 'bg-gray-100 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <i class="fas fa-download w-5 h-5 mr-3 {{ request()->routeIs('admin.patients.export') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500' }}"></i>
+                            Export Data
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Financials Section -->
                 <div x-data="{ open: {{ request()->routeIs('admin.wallets.*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" 

@@ -21,17 +21,42 @@
             body {
                 font-family: 'Figtree', sans-serif;
             }
+            
+            /* Enhanced login page styles */
+            .login-container {
+                backdrop-filter: blur(10px);
+            }
+            
+            /* Smooth animations */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .animate-fadeInUp {
+                animation: fadeInUp 0.6s ease-out;
+            }
         </style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div class="mb-8">
+                <a href="/" class="block">
+                    <x-application-logo class="w-32 h-32 sm:w-40 sm:h-40 mx-auto drop-shadow-lg hover:scale-105 transition-transform duration-300" />
                 </a>
+                <div class="text-center mt-4">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">MediConnect</h1>
+                    <p class="text-gray-600 text-sm sm:text-base">Healthcare Management Platform</p>
+                </div>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md px-6 py-8 bg-white shadow-xl overflow-hidden sm:rounded-xl border border-gray-100">
                 {{ $slot }}
             </div>
         </div>

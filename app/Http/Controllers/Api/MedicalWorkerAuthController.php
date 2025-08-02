@@ -74,14 +74,15 @@ class MedicalWorkerAuthController extends Controller
      */
     public function login(Request $request)
     {
-        Log::debug('MEDICAL_WORKER_LOGIN_ATTEMPT', ['request_data' => $request->all()]);
-        Log::debug('Validator created');
+        Log::info('Medical worker login attempt started.', ['email' => $request->email]);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
+            Log::warning('Medical worker login validation failed.', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validation errors',
@@ -89,38 +90,32 @@ class MedicalWorkerAuthController extends Controller
             ], 422);
         }
 
-        $credentials = $request->only('email', 'password');
-        Log::debug('Attempting to authenticate medical worker with guard.', ['credentials' => $credentials]);
+        $medicalWorker = MedicalWorker::where('email', $request->email)->first();
 
-        if (!auth()->guard('medical-worker')->attempt($credentials)) {
-            Log::warning('MEDICAL_WORKER_LOGIN_FAILED', ['email' => $request->email, 'reason' => 'Invalid credentials from Auth facade']);
+        if (!$medicalWorker || !Hash::check($request->password, $medicalWorker->password)) {
+            Log::warning('Medical worker login failed: Invalid credentials.', ['email' => $request->email]);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        $request->session()->regenerate();
-        $medicalWorker = auth()->guard('medical-worker')->user();
+        Log::info('Medical worker authenticated successfully.', ['worker_id' => $medicalWorker->id]);
 
         // Check if the medical worker is approved
-        Log::debug('Checking approval status for worker: ' . $medicalWorker->id);
         if ($medicalWorker->status !== 'approved') {
+            Log::warning('Login attempt by unapproved medical worker.', ['worker_id' => $medicalWorker->id, 'status' => $medicalWorker->status]);
             return response()->json([
                 'success' => false,
-                'message' => 'Your account is not approved yet. Status: ' . $medicalWorker->status,
+                'message' => 'Your account is not approved yet. Please contact admin.',
+                'data' => [
+                    'approval_status' => $medicalWorker->status,
+                ]
             ], 403);
         }
 
-        // Delete previous tokens
-        Log::debug('Deleting old tokens for worker: ' . $medicalWorker->id);
-        $medicalWorker->tokens()->delete();
-
-        // Create new token
-        Log::debug('Creating new token for worker: ' . $medicalWorker->id);
         $token = $medicalWorker->createToken('auth_token')->plainTextToken;
+        Log::info('Auth token created for medical worker.', ['worker_id' => $medicalWorker->id]);
 
-        Log::debug('Token created. Checking if password change is required for worker: ' . $medicalWorker->id);
-        Log::debug('Medical worker profile picture path: ' . $medicalWorker->profile_picture, ['profile_picture' => $medicalWorker->profile_picture]);
         $passwordChangeRequired = $medicalWorker->password_change_required ?? false;
         $message = $passwordChangeRequired
             ? 'Please change your password'
@@ -134,7 +129,7 @@ class MedicalWorkerAuthController extends Controller
                 'token' => $token,
                 'token_type' => 'Bearer',
             ]
-        ])->setStatusCode(200);
+        ]);
     }
 
     /**

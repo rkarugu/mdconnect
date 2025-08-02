@@ -13,15 +13,16 @@ return [
     |
     */
 
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'api/worker/*', 'api/medical-worker/*', 'worker/*', 'medical-worker/*', 'storage/*'],
 
     // During local development you can leave "*". In production replace with
     // your actual frontend domain(s).
-    'allowed_origins' => [],
+    'allowed_origins' => ['*'], // Allow all origins for development
 
     'allowed_origins_patterns' => [
         '/^http:\/\/localhost(:\d+)?$/',
-        '/^http:\/\/127\.0\.0\.1(:\d+)?$/'
+        '/^http:\/\/127\.0\.0\.1(:\d+)?$/',
+        '/^http:\/\/\d+\.\d+\.\d+\.\d+(:\d+)?$/',
     ],
 
     'allowed_methods'   => ['*'],

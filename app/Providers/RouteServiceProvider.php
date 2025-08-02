@@ -34,6 +34,16 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
+            // Medical Worker API routes (temporarily without auth for debugging)
+            Route::middleware(['api'])
+                ->prefix('api/worker')
+                ->group(base_path('routes/worker_api.php'));
+
+            // Isolated Worker Notification Routes (public access, no authentication)
+            Route::middleware([])
+                ->prefix('api')
+                ->group(base_path('routes/worker_notifications.php'));
+
             // Web routes
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

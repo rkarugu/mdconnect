@@ -45,7 +45,7 @@ return [
             'provider' => 'users',
         ],
         'medical-worker' => [
-            'driver' => 'session',
+            'driver' => 'sanctum',
             'provider' => 'medical-workers',
         ],
     ],

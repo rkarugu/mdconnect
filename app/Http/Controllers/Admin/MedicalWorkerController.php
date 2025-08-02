@@ -29,7 +29,7 @@ class MedicalWorkerController extends Controller
                 })->orWhere('license_number', 'like', "%{$search}%");
             })
             ->when($request->specialty, function ($query, $specialty) {
-                $query->where('specialty_id', $specialty);
+                $query->where('medical_specialty_id', $specialty);
             })
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
@@ -71,7 +71,7 @@ class MedicalWorkerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:medical_workers,email',
             'phone' => 'required|string|max:20',
-            'specialty_id' => 'required|exists:medical_specialties,id',
+            'medical_specialty_id' => 'required|exists:medical_specialties,id',
             'license_number' => 'required|string|max:50|unique:medical_workers',
             'years_of_experience' => 'required|integer|min:0',
             'bio' => 'required|string',
@@ -127,7 +127,7 @@ class MedicalWorkerController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'specialty_id' => $request->specialty_id,
+                'medical_specialty_id' => $request->medical_specialty_id,
                 'license_number' => $request->license_number
             ]);
         
@@ -138,7 +138,7 @@ class MedicalWorkerController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'password' => Hash::make(Str::random(12)), // Temporary password until approved
-                'specialty_id' => $request->specialty_id,
+                'medical_specialty_id' => $request->medical_specialty_id,
                 'license_number' => $request->license_number,
                 'years_of_experience' => $request->years_of_experience,
                 'bio' => $request->bio,
@@ -388,7 +388,7 @@ class MedicalWorkerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:medical_workers,email,' . $medical_worker->id,
             'phone' => 'required|string|max:20',
-            'specialty_id' => 'required|exists:medical_specialties,id',
+            'medical_specialty_id' => 'required|exists:medical_specialties,id',
             'license_number' => 'required|string|max:50|unique:medical_workers,license_number,' . $medical_worker->id,
             'years_of_experience' => 'required|integer|min:0',
             'bio' => 'required|string',
@@ -417,7 +417,7 @@ class MedicalWorkerController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'specialty_id' => $request->specialty_id,
+                'medical_specialty_id' => $request->medical_specialty_id,
                 'license_number' => $request->license_number,
                 'years_of_experience' => $request->years_of_experience,
                 'bio' => $request->bio,
@@ -693,7 +693,7 @@ class MedicalWorkerController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'phone' => 'required|string|max:20',
-                'specialty_id' => 'required|exists:medical_specialties,id',
+                'medical_specialty_id' => 'required|exists:medical_specialties,id',
                 'license_number' => 'required|string|max:50|unique:medical_workers',
                 'years_of_experience' => 'required|integer|min:0',
                 'bio' => 'required|string',

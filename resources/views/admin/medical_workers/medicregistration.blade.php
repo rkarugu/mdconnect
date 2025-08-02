@@ -67,16 +67,16 @@
                     </div>
                     
                     <div>
-                        <label for="specialty_id" class="block text-sm font-medium text-gray-700">Medical Specialty</label>
-                        <select name="specialty_id" id="specialty_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                        <label for="medical_specialty_id" class="block text-sm font-medium text-gray-700">Medical Specialty</label>
+                        <select name="medical_specialty_id" id="medical_specialty_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                             <option value="">Select a specialty</option>
                             @foreach($specialties as $specialty)
-                                <option value="{{ $specialty->id }}" {{ old('specialty_id') == $specialty->id ? 'selected' : '' }}>
+                                <option value="{{ $specialty->id }}" {{ old('medical_specialty_id') == $specialty->id ? 'selected' : '' }}>
                                     {{ $specialty->name }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('specialty_id')<span class="text-red-500 text-sm">{{ $message }}</span>@enderror
+                        @error('medical_specialty_id')<span class="text-red-500 text-sm">{{ $message }}</span>@enderror
                     </div>
                 </div>
             </fieldset>
