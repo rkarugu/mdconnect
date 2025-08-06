@@ -73,15 +73,17 @@ class MedicalWorkerDashboardController extends Controller
                 $data = json_decode($notification->data, true);
                 if ($data && isset($data['shift_id'])) {
                     $bidInvitations[] = [
-                        'invitationId' => (int)$data['shift_id'],
-                        'facility' => $data['facility_name'] ?? 'Unknown Facility',
+                        'invitationId' => $notification->id, // Use notification ID as invitation ID
+                        'id' => $notification->id, // Add explicit 'id' field
+                        'facility' => $data['facility'] ?? ($data['facility_name'] ?? 'Unknown Facility'),
                         'shiftTime' => $data['start_datetime'] ?? 'TBD',
-                        'minimumBid' => (int)($data['pay_rate'] ?? 0),
+                        'minimumBid' => (int)($data['minimum_bid'] ?? ($data['pay_rate'] ?? 0)),
                         'status' => 'pending',
                         'title' => $data['title'] ?? 'New Shift',
                         'location' => $data['location'] ?? '',
                         'endTime' => $data['end_datetime'] ?? '',
-                        'notificationId' => $notification->id
+                        'notificationId' => $notification->id,
+                        'shift_id' => $data['shift_id'] // Include original shift_id for reference
                     ];
                 }
             }
@@ -340,27 +342,69 @@ class MedicalWorkerDashboardController extends Controller
                 ], 401);
             }
 
-            // Get actual bid invitations for this worker
-            $bidInvitations = \App\Models\BidInvitation::with(['locumShift.facility'])
-                ->where('medical_worker_id', $worker->id)
-                ->where('status', 'open')
+            Log::info('Fetching bid invitations for worker', ['worker_id' => $worker->id]);
+            
+            // Get notifications that represent bid invitations (since bid invitations are sent as notifications)
+            $notifications = DB::table('notifications')
+                ->where('notifiable_type', 'App\\Models\\MedicalWorker')
+                ->where('notifiable_id', $worker->id)
+                ->whereNull('read_at')
                 ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($invitation) {
-                    return [
-                        'invitationId' => $invitation->id,
-                        'facility' => $invitation->locumShift->facility->name ?? 'Medical Facility',
-                        'shiftTime' => $invitation->locumShift->start_datetime->format('M d, Y H:i') . ' - ' . $invitation->locumShift->end_datetime->format('H:i'),
-                        'minimumBid' => $invitation->minimum_bid,
-                        'status' => $invitation->status,
-                        'createdAt' => $invitation->created_at->toISOString(),
-                    ];
-                });
+                ->get();
+                
+            $bidInvitations = [];
+            
+            foreach ($notifications as $notification) {
+                $data = json_decode($notification->data, true);
+                
+                if (!isset($data['shift_id'])) {
+                    continue;
+                }
+                
+                // Get the shift details
+                $shift = LocumShift::with('facility')->find($data['shift_id']);
+                
+                if (!$shift) {
+                    continue;
+                }
+                
+                // Skip expired shifts (shifts that have already started)
+                if ($shift->start_datetime <= now()) {
+                    Log::info('Skipping expired shift', [
+                        'shift_id' => $shift->id,
+                        'start_datetime' => $shift->start_datetime,
+                        'current_time' => now()
+                    ]);
+                    continue;
+                }
+                
+                // Skip shifts that are no longer open
+                if ($shift->status !== 'open') {
+                    continue;
+                }
+                
+                $bidInvitations[] = [
+                    'invitationId' => (int)$notification->id,
+                    'facility' => $shift->facility->facility_name ?? 'Medical Facility',
+                    'shiftTime' => $shift->start_datetime->format('M d, Y H:i') . ' - ' . $shift->end_datetime->format('H:i'),
+                    'minimumBid' => $data['minimum_bid'] ?? 0,
+                    'status' => 'pending',
+                    'title' => $data['title'] ?? $shift->title ?? 'New Shift',
+                    'shift_id' => $shift->id,
+                    'createdAt' => $notification->created_at,
+                ];
+            }
+            
+            Log::info('Bid invitations fetched', [
+                'worker_id' => $worker->id,
+                'total_notifications' => count($notifications),
+                'valid_invitations' => count($bidInvitations)
+            ]);
 
             return response()->json([
                 'success' => true,
                 'data' => $bidInvitations,
-                'count' => $bidInvitations->count()
+                'count' => count($bidInvitations)
             ]);
         } catch (\Exception $e) {
             Log::error('Error in bidInvitations', [
@@ -492,35 +536,403 @@ class MedicalWorkerDashboardController extends Controller
 
     public function applyToBidInvitation(Request $request, $id)
     {
-        $worker = Auth::guard('medical-worker')->user();
-        if (!$worker) { return response()->json(['error' => 'Unauthenticated.'], 401); }
-        
-        $bidInvitation = BidInvitation::findOrFail($id);
-        
-        if ($bidInvitation->medical_worker_id !== $worker->id || 
-            $bidInvitation->status !== 'open' || 
-            $bidInvitation->closes_at <= now()) {
-            return response()->json(['error' => 'Invalid invitation'], 400);
-        }
-
-        $bidAmount = $request->input('bid_amount');
-        
-        if ($bidAmount < $bidInvitation->minimum_bid) {
+        try {
+            $worker = auth('sanctum')->user();
+            if (!$worker) {
+                return response()->json(['success' => false, 'error' => 'Unauthenticated.'], 401);
+            }
+            
+            Log::info('Bid invitation application attempt', [
+                'worker_id' => $worker->id,
+                'invitation_id' => $id,
+                'invitation_id_type' => gettype($id),
+                'request_data' => $request->all()
+            ]);
+            
+            // First, let's see what notifications exist for this worker
+            $allNotifications = DB::table('notifications')
+                ->where('notifiable_type', 'App\\Models\\MedicalWorker')
+                ->where('notifiable_id', $worker->id)
+                ->select('id', 'type', 'read_at', 'created_at', 'data')
+                ->orderBy('created_at', 'desc')
+                ->limit(20) // Increased limit for debugging
+                ->get();
+                
+            Log::info('All notifications for worker', [
+                'worker_id' => $worker->id,
+                'total_notifications' => count($allNotifications),
+                'notification_ids' => $allNotifications->pluck('id')->toArray()
+            ]);
+            
+            // First try to find by UUID (direct match)
+            $notification = $allNotifications->firstWhere('id', $id);
+            
+            // If not found by UUID, try to find by numeric ID in data
+            if (!$notification) {
+                foreach ($allNotifications as $notif) {
+                    $data = json_decode($notif->data, true);
+                    // Check if this notification has a numeric ID that matches
+                    if (isset($data['id']) && $data['id'] == $id) {
+                        $notification = $notif;
+                        Log::info('Found notification by numeric ID in data', [
+                            'notification_id' => $notification->id,
+                            'data_id' => $data['id']
+                        ]);
+                        break;
+                    }
+                    // Also check shift_id for backward compatibility
+                    if (isset($data['shift_id']) && $data['shift_id'] == $id) {
+                        $notification = $notif;
+                        Log::info('Found notification by shift_id', [
+                            'notification_id' => $notification->id,
+                            'shift_id' => $data['shift_id']
+                        ]);
+                        break;
+                    }
+                }
+            }
+            
+            Log::info('Notification lookup result', [
+                'notification_found' => $notification ? 'yes' : 'no',
+                'notification_id' => $id,
+                'worker_id' => $worker->id,
+                'notification_details' => $notification ? [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'read_at' => $notification->read_at,
+                    'created_at' => $notification->created_at,
+                    'data' => json_decode($notification->data, true)
+                ] : null,
+                'all_notification_ids' => $allNotifications->pluck('id')->toArray()
+            ]);
+                
+            if (!$notification) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Bid invitation not found or already processed'
+                ], 404);
+            }
+            
+            $notificationData = json_decode($notification->data, true);
+            $shiftId = $notificationData['shift_id'] ?? null;
+            
+            if (!$shiftId) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid bid invitation data'
+                ], 400);
+            }
+            
+            // Find the actual shift
+            $shift = LocumShift::find($shiftId);
+            if (!$shift || $shift->status !== 'open') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift is no longer available'
+                ], 400);
+            }
+            
+            // Check if shift has expired
+            if ($shift->start_datetime <= now()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'This shift has already started or expired'
+                ], 400);
+            }
+            
+            // Check if worker already applied
+            $existingApplication = \App\Models\ShiftApplication::where('shift_id', $shiftId)
+                ->where('medical_worker_id', $worker->id)
+                ->first();
+                
+            if ($existingApplication) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'You have already applied for this shift'
+                ], 400);
+            }
+            
+            // Create shift application
+            $application = \App\Models\ShiftApplication::create([
+                'shift_id' => $shiftId,
+                'medical_worker_id' => $worker->id,
+                'status' => 'waiting',
+                'applied_at' => now(),
+            ]);
+            
+            // Mark notification as read
+            DB::table('notifications')
+                ->where('id', $id)
+                ->update(['read_at' => now()]);
+            
+            Log::info('Bid invitation accepted successfully', [
+                'worker_id' => $worker->id,
+                'shift_id' => $shiftId,
+                'application_id' => $application->id
+            ]);
+            
             return response()->json([
-                'error' => 'Bid amount must be at least $' . $bidInvitation->minimum_bid
-            ], 400);
+                'success' => true,
+                'message' => 'Application submitted successfully',
+                'application_id' => $application->id
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in applyToBidInvitation', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to process application',
+                'message' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
         }
+    }
 
-        // The Bid model is not imported, this will fail if called.
-        Bid::create([
-            'bid_invitation_id' => $bidInvitation->id,
-            'medical_worker_id' => $worker->id,
-            'amount' => $bidAmount
-        ]);
+    /**
+     * Get shift applications for the authenticated medical worker
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getShiftApplications(Request $request)
+    {
+        try {
+            $worker = auth('sanctum')->user();
+            if (!$worker) {
+                return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+            }
 
-        return response()->json([
-            'message' => 'Bid submitted successfully',
-            'bid_amount' => $bidAmount
-        ]);
+            $applications = \App\Models\ShiftApplication::with(['shift.facility'])
+                ->where('medical_worker_id', $worker->id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($application) {
+                    $shift = $application->shift;
+                    return [
+                        'id' => $application->id,
+                        'shift_id' => $application->shift_id,
+                        'status' => $application->status,
+                        'facility_name' => $shift->facility->facility_name ?? 'Unknown Facility',
+                        'shift_title' => $shift->title ?? 'Shift',
+                        'shift_time' => $shift->start_datetime->format('M d, Y H:i') . ' - ' . $shift->end_datetime->format('H:i'),
+                        'pay_rate' => (int)$shift->pay_rate,
+                        'applied_at' => $application->created_at->toISOString(),
+                        'selected_at' => $application->selected_at?->toISOString(),
+                        'shift_start_time' => $shift->start_datetime->toISOString(),
+                        'shift_end_time' => $shift->end_datetime->toISOString(),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $applications
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching shift applications', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to fetch shift applications'
+            ], 500);
+        }
+    }
+
+    /**
+     * Start a shift (mark application as in progress)
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function startShift(Request $request, $id)
+    {
+        try {
+            $worker = auth('sanctum')->user();
+            if (!$worker) {
+                return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+            }
+
+            $application = \App\Models\ShiftApplication::with('shift')
+                ->where('id', $id)
+                ->where('medical_worker_id', $worker->id)
+                ->first();
+
+            if (!$application) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift application not found'
+                ], 404);
+            }
+
+            if ($application->status !== 'approved') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift is not approved yet'
+                ], 400);
+            }
+
+            $shift = $application->shift;
+            $now = now();
+            $startTime = $shift->start_datetime;
+            $allowedStartTime = $startTime->subMinutes(15);
+
+            if ($now->isBefore($allowedStartTime)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cannot start shift more than 15 minutes early'
+                ], 400);
+            }
+
+            if ($now->isAfter($startTime->addHour())) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift start time has passed'
+                ], 400);
+            }
+
+            // Update application status to in_progress
+            $application->update([
+                'status' => 'in_progress',
+                'started_at' => $now
+            ]);
+
+            // Update shift status and track start time if first worker
+            if (!$shift->actual_start_time) {
+                $shift->update([
+                    'status' => 'in_progress',
+                    'actual_start_time' => $now
+                ]);
+                
+                Log::info('First worker started - Shift timing started', [
+                    'shift_id' => $shift->id,
+                    'actual_start_time' => $now->toISOString()
+                ]);
+            } else {
+                $shift->update(['status' => 'in_progress']);
+            }
+
+            Log::info('Shift started successfully', [
+                'worker_id' => $worker->id,
+                'application_id' => $application->id,
+                'shift_id' => $shift->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Shift started successfully',
+                'application_id' => $application->id
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error starting shift', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to start shift'
+            ], 500);
+        }
+    }
+
+    /**
+     * Complete a shift (mark application as completed)
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function completeShift(Request $request, $id)
+    {
+        try {
+            $worker = auth('sanctum')->user();
+            if (!$worker) {
+                return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+            }
+
+            $application = \App\Models\ShiftApplication::with('shift')
+                ->where('id', $id)
+                ->where('medical_worker_id', $worker->id)
+                ->first();
+
+            if (!$application) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift application not found'
+                ], 404);
+            }
+
+            if ($application->status !== 'in_progress') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Shift is not in progress'
+                ], 400);
+            }
+
+            $shift = $application->shift;
+            $now = now();
+            $endTime = $shift->end_datetime;
+            $allowedCompleteTime = $endTime->subMinutes(5);
+
+            if ($now->isBefore($allowedCompleteTime)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cannot complete shift more than 5 minutes early'
+                ], 400);
+            }
+
+            // Update application status to completed
+            $application->update([
+                'status' => 'completed',
+                'completed_at' => $now
+            ]);
+
+            // Check if this is the first worker to start (for shift timing)
+            if (!$shift->actual_start_time) {
+                $shift->updateStartTime();
+            }
+
+            // Check if all workers have completed their shifts
+            if ($shift->allWorkersCompleted()) {
+                // Mark shift as completed and set end time
+                $shift->updateEndTime();
+                
+                Log::info('All workers completed - Shift marked as completed', [
+                    'shift_id' => $shift->id,
+                    'duration' => $shift->duration_display
+                ]);
+            }
+
+            Log::info('Shift completed successfully', [
+                'worker_id' => $worker->id,
+                'application_id' => $application->id,
+                'shift_id' => $shift->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Shift completed successfully',
+                'application_id' => $application->id
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error completing shift', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to complete shift'
+            ], 500);
+        }
     }
 }

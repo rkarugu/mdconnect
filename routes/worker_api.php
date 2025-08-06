@@ -33,6 +33,23 @@ Route::prefix('locum-shifts')->name('locum-shifts.')->group(function () {
     Route::post('/{id}/start', [LocumShiftController::class, 'startShift'])->name('start');
 });
 
+// Bid Invitations & Instant Requests (Protected by Sanctum)
+Route::middleware(['auth:sanctum'])->prefix('shifts')->name('shifts.')->group(function () {
+    // Bid invitation routes
+    Route::get('/bid-invitations', [MedicalWorkerDashboardController::class, 'bidInvitations'])->name('bid-invitations');
+    Route::post('/bid-invitations/{id}/apply', [MedicalWorkerDashboardController::class, 'applyToBidInvitation'])->name('apply-bid-invitation');
+
+    Route::get('/instant-requests', [MedicalWorkerDashboardController::class, 'instantRequests'])->name('instant-requests');
+    Route::post('/instant-requests/{id}/accept', [MedicalWorkerDashboardController::class, 'acceptInstantRequest'])->name('instant-requests.accept');
+});
+
+// Shift Applications (Protected by Sanctum)
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/shift-applications', [MedicalWorkerDashboardController::class, 'getShiftApplications'])->name('shift-applications');
+    Route::post('/shift-applications/{id}/start', [MedicalWorkerDashboardController::class, 'startShift'])->name('start-shift');
+    Route::post('/shift-applications/{id}/complete', [MedicalWorkerDashboardController::class, 'completeShift'])->name('complete-shift');
+});
+
 // Wallet
 Route::prefix('wallet')->name('wallet.')->group(function () {
     Route::get('/', [WalletController::class, 'index'])->name('index');

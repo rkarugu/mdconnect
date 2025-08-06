@@ -32,11 +32,31 @@
         <div class="border-t border-gray-200 mt-6 pt-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500">Shift Time</h3>
+                    <h3 class="text-sm font-medium text-gray-500">Scheduled Time</h3>
                     <p class="mt-1 text-lg text-gray-900">{{ $locumShift->start_datetime->format('g:i A') }} - {{ $locumShift->end_datetime->format('g:i A') }} ({{ $locumShift->start_datetime->diffInHours($locumShift->end_datetime) }} hrs)</p>
+                    
+                    @if($locumShift->actual_start_time)
+                        <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <h4 class="text-sm font-medium text-blue-700">Actual Timing</h4>
+                            <p class="text-sm text-blue-600">
+                                <span class="font-medium">Started:</span> {{ $locumShift->actual_start_time->format('M j, Y g:i A') }}
+                            </p>
+                            @if($locumShift->actual_end_time)
+                                <p class="text-sm text-blue-600">
+                                    <span class="font-medium">Ended:</span> {{ $locumShift->actual_end_time->format('M j, Y g:i A') }}
+                                </p>
+                                @if($locumShift->duration_display)
+                                    <p class="text-sm font-semibold text-blue-700">
+                                        <span class="font-medium">Duration:</span> {{ $locumShift->duration_display }}
+                                    </p>
+                                @endif
+                            @endif
+                        </div>
+                    @endif
+                    
                     @if($locumShift->ended_at)
                         <p class="mt-2 text-sm text-gray-500">
-                            <span class="font-medium">Ended:</span> {{ $locumShift->ended_at->format('M j, Y g:i A') }}
+                            <span class="font-medium">System Ended:</span> {{ $locumShift->ended_at->format('M j, Y g:i A') }}
                             @if($locumShift->endedBy)
                                 <br><span class="font-medium">By:</span> {{ $locumShift->endedBy->name }}
                             @endif
@@ -56,6 +76,145 @@
             <div class="mt-6">
                 <h3 class="text-sm font-medium text-gray-500">Description</h3>
                 <p class="mt-1 text-gray-700">{{ $locumShift->description }}</p>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Action Center -->
+    <div class="bg-white shadow-lg rounded-lg mb-8">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-cogs text-blue-500 mr-3"></i>
+                Action Center
+            </h2>
+        </div>
+        <div class="p-6">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-blue-600">{{ $locumShift->applications->count() }}</div>
+                    <div class="text-sm text-blue-500 font-medium">Total Applications</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-green-600">{{ $locumShift->applications->where('status', 'approved')->count() }}</div>
+                    <div class="text-sm text-green-500 font-medium">Approved</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-purple-600">{{ $locumShift->applications->where('status', 'completed')->count() }}</div>
+                    <div class="text-sm text-purple-500 font-medium">Completed</div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-yellow-600">${{ number_format($locumShift->pay_rate, 0) }}</div>
+                    <div class="text-sm text-yellow-500 font-medium">Pay Rate</div>
+                </div>
+            </div>
+
+            <!-- Shift Management Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Shift Status & Timing -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-clock text-indigo-500 mr-2"></i>
+                        Shift Status & Timing
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Current Status:</span>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                @switch($locumShift->status)
+                                    @case('open') bg-green-100 text-green-700 @break
+                                    @case('in_progress') bg-yellow-100 text-yellow-700 @break
+                                    @case('completed') bg-blue-100 text-blue-700 @break
+                                    @default bg-gray-100 text-gray-700
+                                @endswitch">
+                                {{ ucfirst(str_replace('_', ' ', $locumShift->status)) }}
+                            </span>
+                        </div>
+                        @if($locumShift->actual_start_time && $locumShift->actual_end_time)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Actual Duration:</span>
+                                <span class="font-semibold text-blue-600">{{ $locumShift->duration_display ?? 'Calculating...' }}</span>
+                            </div>
+                        @endif
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Workers Completed:</span>
+                            <span class="font-semibold">{{ $locumShift->applications->where('status', 'completed')->count() }} / {{ $locumShift->applications->where('status', 'approved')->count() }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Actions -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-tools text-green-500 mr-2"></i>
+                        Management Actions
+                    </h3>
+                    <div class="space-y-2">
+                        @if($locumShift->status === 'completed')
+                            <button class="w-full bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium" disabled>
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Shift Completed
+                            </button>
+                        @elseif($locumShift->status === 'in_progress')
+                            <button class="w-full bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium" disabled>
+                                <i class="fas fa-clock mr-2"></i>
+                                Shift In Progress
+                            </button>
+                        @endif
+                        
+                        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-300" onclick="alert('Feature coming soon: Generate shift report')">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            Generate Report
+                        </button>
+                        
+                        <button class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition duration-300" onclick="alert('Feature coming soon: Export shift data')">
+                            <i class="fas fa-download mr-2"></i>
+                            Export Data
+                        </button>
+                        
+                        @if($locumShift->applications->where('status', 'completed')->count() > 0)
+                            <button class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition duration-300" onclick="alert('Feature coming soon: Send feedback request to workers')">
+                                <i class="fas fa-star mr-2"></i>
+                                Request Feedback
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shift Progress Timeline -->
+            @if($locumShift->applications->where('status', '!=', 'waiting')->count() > 0)
+            <div class="mt-6 border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-timeline text-blue-500 mr-2"></i>
+                    Shift Progress Timeline
+                </h3>
+                <div class="space-y-3">
+                    @if($locumShift->actual_start_time)
+                        <div class="flex items-center text-sm">
+                            <div class="w-3 h-3 bg-green-400 rounded-full mr-3"></div>
+                            <span class="text-gray-600">Shift started at</span>
+                            <span class="font-semibold ml-2">{{ $locumShift->actual_start_time->format('M j, Y g:i A') }}</span>
+                        </div>
+                    @endif
+                    @if($locumShift->actual_end_time)
+                        <div class="flex items-center text-sm">
+                            <div class="w-3 h-3 bg-blue-400 rounded-full mr-3"></div>
+                            <span class="text-gray-600">Shift completed at</span>
+                            <span class="font-semibold ml-2">{{ $locumShift->actual_end_time->format('M j, Y g:i A') }}</span>
+                        </div>
+                    @endif
+                    @foreach($locumShift->applications->where('status', 'completed')->take(3) as $completedApp)
+                        <div class="flex items-center text-sm">
+                            <div class="w-3 h-3 bg-purple-400 rounded-full mr-3"></div>
+                            <span class="text-gray-600">{{ $completedApp->medicalWorker->name }} completed their shift</span>
+                            @if($completedApp->completed_at)
+                                <span class="font-semibold ml-2">{{ $completedApp->completed_at->format('M j, g:i A') }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
             </div>
             @endif
         </div>

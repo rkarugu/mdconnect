@@ -101,9 +101,96 @@ Route::group([], function () {
 Route::get('placeholder/{width}/{height?}', [\App\Http\Controllers\Api\PlaceholderController::class, 'image'])->name('placeholder.image');
 Route::get('placeholder/avatar/{size?}', [\App\Http\Controllers\Api\PlaceholderController::class, 'avatar'])->name('placeholder.avatar');
 
-// WORKING DASHBOARD ROUTE - FINAL SOLUTION
+// CORS TEST ENDPOINT
+Route::get('cors-test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'CORS is working correctly!',
+        'timestamp' => now()->toISOString(),
+        'origin' => request()->header('Origin'),
+        'user_agent' => request()->header('User-Agent')
+    ]);
+});
+
+Route::post('cors-test-post', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'CORS POST request working correctly!',
+        'data' => request()->all(),
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
+// DEBUG ENDPOINT - Check authenticated user
+Route::get('worker/debug-auth', function () {
+    $worker = auth('sanctum')->user();
+    if (!$worker) {
+        return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+    }
+    
+    // Get notifications for this worker
+    $notifications = DB::table('notifications')
+        ->where('notifiable_type', 'App\\Models\\MedicalWorker')
+        ->where('notifiable_id', $worker->id)
+        ->whereNull('read_at')
+        ->get();
+    
+    return response()->json([
+        'success' => true,
+        'authenticated_worker_id' => $worker->id,
+        'worker_email' => $worker->email,
+        'notifications_count' => $notifications->count(),
+        'notifications' => $notifications->map(function($n) {
+            return [
+                'id' => $n->id,
+                'type' => $n->type,
+                'data' => json_decode($n->data, true)
+            ];
+        })
+    ]);
+})->middleware('auth:sanctum');
+
+// TEST ENDPOINT - Create bid invitation notifications for testing
+Route::post('worker/create-test-bid-invitations', function () {
+    $worker = auth('sanctum')->user();
+    if (!$worker) {
+        return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+    }
+    
+    // Create a test shift if it doesn't exist
+    $shift = \App\Models\LocumShift::firstOrCreate(
+        ['title' => 'Test Emergency Shift'],
+        [
+            'facility_id' => 1,
+            'worker_type' => 'Nurse',
+            'start_datetime' => now()->addHours(2),
+            'end_datetime' => now()->addHours(10),
+            'pay_rate' => 500,
+            'status' => 'open',
+            'slots_available' => 1,
+            'description' => 'Test shift for bid invitation testing'
+        ]
+    );
+    
+    // Create a test bid invitation notification
+    $worker->notify(new \App\Notifications\NewShiftAvailable($shift));
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Test bid invitation created',
+        'shift_id' => $shift->id,
+        'worker_id' => $worker->id
+    ]);
+})->middleware('auth:sanctum');
+
+// WORKING DASHBOARD ROUTE - FINAL SOLUTION WITH EXPIRED SHIFT FILTERING
 Route::get('worker/dashboard-success', function () {
-    $worker_id = 1;
+    // Get the authenticated worker from the request
+    $worker = auth('sanctum')->user();
+    if (!$worker) {
+        return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+    }
+    $worker_id = $worker->id;
     
     $notifications = DB::table('notifications')
         ->where('notifiable_type', 'App\\Models\\MedicalWorker')
@@ -114,18 +201,70 @@ Route::get('worker/dashboard-success', function () {
         ->get();
     
     $bidInvitations = [];
+    $expiredCount = 0;
+    
     foreach ($notifications as $notification) {
         $data = json_decode($notification->data, true);
         if ($data && isset($data['shift_id'])) {
+            // Get the actual shift to check if it's expired
+            $shift = \App\Models\LocumShift::with('facility')->find($data['shift_id']);
+            
+            if (!$shift) {
+                continue; // Skip if shift doesn't exist
+            }
+            
+            // Skip expired shifts (shifts that have already started)
+            if ($shift->start_datetime <= now()) {
+                $expiredCount++;
+                continue;
+            }
+            
+            // Skip shifts that are no longer open
+            if ($shift->status !== 'open') {
+                continue;
+            }
+            
             $bidInvitations[] = [
-                'invitationId' => (int)$data['shift_id'],
-                'facility' => $data['facility_name'] ?? 'Unknown Facility',
-                'shiftTime' => $data['start_datetime'] ?? 'TBD',
-                'minimumBid' => (int)($data['pay_rate'] ?? 0),
+                'invitationId' => $notification->id, // Keep as UUID string
+                'notificationId' => $notification->id, // Add explicit notificationId field
+                'facility' => $shift->facility->facility_name ?? 'Unknown Facility',
+                'shiftTime' => $shift->start_datetime->format('M d, Y H:i') . ' - ' . $shift->end_datetime->format('H:i'),
+                'minimumBid' => (int)($data['minimum_bid'] ?? $shift->pay_rate ?? 0),
                 'status' => 'pending',
-                'title' => $data['title'] ?? 'New Shift'
+                'title' => $data['title'] ?? $shift->title ?? 'New Shift'
             ];
         }
+    }
+    
+    // Get shift applications for the authenticated worker
+    $shiftApplications = [];
+    try {
+        $applications = \App\Models\ShiftApplication::with(['shift.facility'])
+            ->where('medical_worker_id', $worker->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        foreach ($applications as $application) {
+            $shift = $application->shift;
+            $shiftApplications[] = [
+                'id' => $application->id,
+                'shift_id' => $application->shift_id,
+                'status' => $application->status,
+                'facility_name' => $shift->facility->facility_name ?? 'Unknown Facility',
+                'shift_title' => $shift->title ?? 'Shift',
+                'shift_time' => $shift->start_datetime->format('M d, Y H:i') . ' - ' . $shift->end_datetime->format('H:i'),
+                'pay_rate' => (int)$shift->pay_rate,
+                'applied_at' => $application->created_at ? $application->created_at->toISOString() : null,
+                'selected_at' => $application->selected_at ? $application->selected_at->toISOString() : null,
+                'shift_start_time' => $shift->start_datetime ? $shift->start_datetime->toISOString() : null,
+                'shift_end_time' => $shift->end_datetime ? $shift->end_datetime->toISOString() : null,
+            ];
+        }
+    } catch (\Exception $e) {
+        \Log::error('Error fetching shift applications for dashboard', [
+            'error' => $e->getMessage(),
+            'worker_id' => $worker->id
+        ]);
     }
     
     return response()->json([
@@ -133,10 +272,19 @@ Route::get('worker/dashboard-success', function () {
         'data' => [
             'worker' => ['id' => 1, 'name' => 'Medical Worker', 'email' => 'ayden@uptownnvintage.com'],
             'bidInvitations' => $bidInvitations,
+            'shift_applications' => $shiftApplications,
             'pendingApplications' => [],
-            'stats' => ['totalBidInvitations' => count($bidInvitations)]
+            'stats' => [
+                'totalBidInvitations' => count($bidInvitations),
+                'totalShiftApplications' => count($shiftApplications)
+            ]
         ],
-        'debug' => ['notifications_found' => count($notifications), 'bid_invitations_created' => count($bidInvitations)]
+        'debug' => [
+            'notifications_found' => count($notifications), 
+            'expired_shifts_filtered' => $expiredCount,
+            'active_bid_invitations' => count($bidInvitations),
+            'current_time' => now()->toISOString()
+        ]
     ]);
 });
 
@@ -168,19 +316,14 @@ Route::get('worker/dashboard-temp', function () {
 // This route was overriding our working notification conversion logic
 
 // Protected routes for Medical Worker SPA (other endpoints)
-Route::middleware(['auth:medical-worker'])->prefix('worker')->name('worker.')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('worker')->name('worker.')->group(function () {
     Route::post('logout', [MedicalWorkerAuthController::class, 'logout'])->name('logout');
     Route::get('me', [MedicalWorkerAuthController::class, 'me'])->name('me');
     Route::put('profile', [MedicalWorkerAuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('change-password', [MedicalWorkerAuthController::class, 'changePassword'])->name('change-password');
     Route::get('shifts/upcoming', [MedicalWorkerDashboardController::class, 'upcomingShifts'])->name('shifts.upcoming');
     Route::get('shifts/instant-requests', [MedicalWorkerDashboardController::class, 'instantRequests'])->name('shifts.instant-requests');
-    Route::get('shifts/bid-invitations', [MedicalWorkerDashboardController::class, 'bidInvitations'])->name('shifts.bid-invitations');
     Route::get('shifts/history', [MedicalWorkerDashboardController::class, 'shiftHistory'])->name('shifts.history');
-
-    // Action routes
-    Route::post('shifts/instant-requests/{id}/accept', [MedicalWorkerDashboardController::class, 'acceptInstantRequest'])->name('shifts.instant-requests.accept');
-    Route::post('shifts/bid-invitations/{id}/apply', [MedicalWorkerDashboardController::class, 'applyToBidInvitation'])->name('shifts.bid-invitations.apply');
 
     // Wallet routes
     Route::get('wallet', [\App\Http\Controllers\Api\Worker\WalletController::class, 'show'])->name('wallet');

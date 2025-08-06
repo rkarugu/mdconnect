@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\MedicalWorkerAuthController;
 use App\Http\Controllers\Api\MedicalWorkerDashboardController;
 use App\Http\Controllers\Api\Worker\LocumShiftController as ApiWorkerLocumShiftController;
 use App\Http\Controllers\Web\Facility\WalletController;
+use App\Http\Controllers\Admin\ShiftApplicationController;
 
 // Route to serve storage files with CORS headers
 Route::get('/storage/{path}', function ($path) {
@@ -164,6 +165,12 @@ Route::prefix('admin')->middleware(['web', 'auth', 'verified'])->group(function 
 
         // System Settings
         Route::get('/settings', [SystemSettingsController::class, 'index'])->name('settings');
+
+        // Shift Applications Management
+        Route::get('/shift-applications', [ShiftApplicationController::class, 'index'])->name('admin.shift-applications.index');
+        Route::get('/shift-applications/{shiftApplication}', [ShiftApplicationController::class, 'show'])->name('admin.shift-applications.show');
+        Route::patch('/shift-applications/{shiftApplication}/approve', [ShiftApplicationController::class, 'approve'])->name('admin.shift-applications.approve');
+        Route::patch('/shift-applications/{shiftApplication}/reject', [ShiftApplicationController::class, 'reject'])->name('admin.shift-applications.reject');
 
         // Profile & Change Password
         Route::get('/profile', [AdminProfileController::class, 'index'])->name('admin.profile');

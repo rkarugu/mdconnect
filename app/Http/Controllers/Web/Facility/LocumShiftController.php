@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Web\Facility;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Notification;
 use App\Models\LocumShift;
 use App\Models\MedicalFacility;
 use App\Models\MedicalWorker;
 use App\Models\MedicalSpecialty;
 use App\Notifications\NewShiftAvailable;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 
 class LocumShiftController extends Controller
 {

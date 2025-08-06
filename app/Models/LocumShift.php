@@ -11,10 +11,13 @@ class LocumShift extends Model
 
     protected $fillable = [
         'facility_id',
+        'medical_worker_id',
         'title',
         'description',
         'start_datetime',
         'end_datetime',
+        'actual_start_time',
+        'actual_end_time',
         'location',
         'worker_type',
         'slots_available',
@@ -30,6 +33,9 @@ class LocumShift extends Model
     protected $casts = [
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime',
+        'actual_start_time' => 'datetime',
+        'actual_end_time' => 'datetime',
+        'ended_at' => 'datetime',
         'auto_match' => 'boolean',
         'instant_book' => 'boolean',
     ];
@@ -65,5 +71,73 @@ class LocumShift extends Model
     public function applications()
     {
         return $this->hasMany(ShiftApplication::class, 'shift_id');
+    }
+
+    /**
+     * Calculate the duration of the shift in minutes
+     */
+    public function getDurationMinutesAttribute()
+    {
+        if (!$this->actual_start_time || !$this->actual_end_time) {
+            return null;
+        }
+
+        return $this->actual_start_time->diffInMinutes($this->actual_end_time);
+    }
+
+    /**
+     * Get formatted duration display (e.g., "2h 30m")
+     */
+    public function getDurationDisplayAttribute()
+    {
+        $minutes = $this->duration_minutes;
+        if (!$minutes) {
+            return null;
+        }
+
+        $hours = intval($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+
+        if ($hours > 0 && $remainingMinutes > 0) {
+            return "{$hours}h {$remainingMinutes}m";
+        } elseif ($hours > 0) {
+            return "{$hours}h";
+        } else {
+            return "{$remainingMinutes}m";
+        }
+    }
+
+    /**
+     * Check if all workers have completed their shift applications
+     */
+    public function allWorkersCompleted()
+    {
+        $totalApplications = $this->applications()->where('status', 'approved')->count();
+        $completedApplications = $this->applications()->where('status', 'completed')->count();
+        
+        return $totalApplications > 0 && $totalApplications === $completedApplications;
+    }
+
+    /**
+     * Update shift timing when first worker starts
+     */
+    public function updateStartTime()
+    {
+        if (!$this->actual_start_time) {
+            $this->update(['actual_start_time' => now()]);
+        }
+    }
+
+    /**
+     * Update shift timing when all workers complete
+     */
+    public function updateEndTime()
+    {
+        if ($this->allWorkersCompleted() && !$this->actual_end_time) {
+            $this->update([
+                'actual_end_time' => now(),
+                'status' => 'completed'
+            ]);
+        }
     }
 }

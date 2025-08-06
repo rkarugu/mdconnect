@@ -17,6 +17,13 @@ class ShiftApplication extends Model
         'selected_at',
     ];
 
+    protected $casts = [
+        'applied_at' => 'datetime',
+        'selected_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function shift()
     {
         return $this->belongsTo(LocumShift::class, 'shift_id');

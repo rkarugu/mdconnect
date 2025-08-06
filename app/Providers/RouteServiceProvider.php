@@ -34,8 +34,8 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
-            // Medical Worker API routes (temporarily without auth for debugging)
-            Route::middleware(['api'])
+            // Medical Worker API routes with Sanctum authentication
+            Route::middleware(['api', 'auth:sanctum'])
                 ->prefix('api/worker')
                 ->group(base_path('routes/worker_api.php'));
 
